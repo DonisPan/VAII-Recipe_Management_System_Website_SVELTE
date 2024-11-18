@@ -36,7 +36,6 @@
 </div>
 
 <style>
-    /* Overall container styling */
     .register_container {
         width: 400px;
         display: grid;
@@ -50,7 +49,6 @@
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     }
 
-    /* Header styling */
     .register_container_box h1 {
         margin: 0;
         font-family: "Trebuchet MS", Helvetica, sans-serif;
@@ -60,7 +58,6 @@
         color: #49306B;
     }
 
-    /* Input field container styling */
     .register_container_box2 {
         display: flex;
         align-items: center;
@@ -105,7 +102,6 @@
         background-size: 8px 10px;
     }
 
-    /* Button container styling */
     .register_container_box3 {
         display: flex;
         justify-content: space-between;
@@ -113,7 +109,6 @@
         margin-top: 10px;
     }
 
-    /* Button styles */
     button {
         font-family: "Trebuchet MS", Helvetica, sans-serif;
         font-size: 14px;
@@ -144,7 +139,6 @@
         color: #49306B;
     }
 
-    /* Responsive design */
     @media (max-width: 500px) {
         .register_container {
             width: 90%;
