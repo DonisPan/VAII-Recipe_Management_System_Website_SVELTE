@@ -12,15 +12,6 @@
 
 <style>
     @import "/static/pallete.css";
-
-    body {
-        font-family: "Trebuchet MS", sans-serif;
-        margin: 0;
-        padding: 0;
-        background: linear-gradient(180deg, var(--dun), var(--celadon));
-        color: var(--tekhelet);
-    }
-
     .page-content {
         display: flex;
         flex-wrap: wrap;

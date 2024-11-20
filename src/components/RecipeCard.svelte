@@ -1,9 +1,10 @@
 <script>
-    export let route = "#";
-    export let onClick = () => { window.location.href = route };
+    export let name = "";
+    export let onClick = () => { window.location.href = name };
     export let onMouseover = () => {};
     export let onFocus = () => {};
     export let image = "";
+    export let difficulty = "";
 </script>
 
 <button class="recipe-card"
@@ -16,8 +17,8 @@
         <img src="{image}" alt="missing_recipe_image"/>
     </div>
     <div class="recipe-info">
-        <p class="recipe-name">Recipe Name</p>
-        <p class="recipe-difficulty">Difficulty: Easy</p>
+        <p class="recipe-name">{name}</p>
+        <p class="recipe-difficulty">Difficulty: {difficulty}</p>
     </div>
 </button>
 

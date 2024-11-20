@@ -1,9 +1,11 @@
 <script>
+    import {page} from "$app/stores";
+    $: recipe = $page.params.recipeP;
 </script>
 
 <div class="recipe-page">
     <div class="recipe-header">
-        <h1>Recipe Name</h1>
+        <h1>{recipe}</h1>
         <h3>by Who</h3>
         <img src="/images/imgTest.png" alt="recipe_image"/>
     </div>

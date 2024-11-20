@@ -26,6 +26,7 @@
                     <li> <a href="/registerP" >Sign up</a> </li>
                 {:else}
                     <li> <a on:click={toggle} >Logout</a> </li>
+                    <li> <span>donisvasek@gmail.com</span> </li>
                 {/if}
             </ul>
         </div>

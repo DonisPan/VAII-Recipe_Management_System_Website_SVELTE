@@ -1,26 +1,51 @@
-<script>
+<script lang="ts">
     import RecipeCard from "../components/RecipeCard.svelte";
+    import { supabase } from '$lib/supabase';
 
-    let recipes = [
-        { route: "/recipeP", image: "/images/imgTest.png"},
-        { route: "/recipeP", image: "/images/imgTest.png"},
-        { route: "/recipeP", image: "/images/imgTest.png"},
-        { route: "/recipeP", image: "/images/imgTest.png"},
-        { route: "/recipeP", image: "/images/imgTest.png"},
-        { route: "/recipeP", image: "/images/imgTest.png"},
-    ];
+    interface Recipe {
+        name: string;
+        image: string;
+        ck_difficulty: {
+            difficulty: string;
+        } | null; // Handle potential null values
+    }
+
+    let recipes: { name: string; image: string; difficulty: string }[] = [];
+
+    async function loadRecipes() {
+        const { data } = await supabase
+            .from('ck_recipe')
+            .select(`
+            name,
+            image,
+            ck_difficulty (difficulty)
+        `) as { data: Recipe[] };
+
+        console.log('Recipes data with difficulty:', data);
+
+        // Map data to the required format
+        recipes = data.map(recipe => ({
+            name: recipe.name || 'Default Name',
+            image: recipe.image || '/images/default-image.png',
+            difficulty: recipe.ck_difficulty?.difficulty || 'Unknown'
+        }));
+    }
+
+
+
+
+    loadRecipes();
 </script>
 
 <div class="page-content">
     {#each recipes as recipe}
-        <RecipeCard route={recipe.route} image={recipe.image}></RecipeCard>
+        <RecipeCard name={recipe.name} image={recipe.image} difficulty={recipe.difficulty}></RecipeCard>
     {/each}
 </div>
 
 <style>
     @import '/static/pallete.css';
 
-    /* Page Content Styling */
     .page-content {
         all: unset;
         display: grid;
