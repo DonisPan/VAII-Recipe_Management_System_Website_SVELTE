@@ -1,6 +1,7 @@
 <script>
     import {page} from "$app/stores";
     $: recipe = $page.params.recipeP;
+    import { supabase } from '$lib/supabase';
 </script>
 
 <div class="recipe-page">

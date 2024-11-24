@@ -1,14 +1,58 @@
+<script lang="ts">
+    import {supabase} from "$lib/supabase";
+
+    let name: string;
+    let surname: string;
+    let email: string;
+    let password: string;
+    let message: string;
+    let gender: string;
+
+    async function signUp() {
+        const { data: userData, error: authError } = await supabase.auth.signUp({
+            email,
+            password
+        });
+
+        if (authError) {
+            message = `Sign up failed: ${authError.message}`;
+            console.error(authError);
+            return;
+        }
+
+        if (userData.user) {
+            // Insert additional user details into the ck_person table
+            const { error: profileError } = await supabase
+                .from('ck_person')
+                .insert({
+                    id: userData.user.id, // Supabase user ID
+                    name,
+                    surname,
+                    gender
+                });
+
+            if (profileError) {
+                message = `Failed to save profile: ${profileError.message}`;
+                console.error(profileError);
+            } else {
+                message = 'Sign up successful! Please check your email to confirm your account.';
+            }
+        }
+    }
+</script>
+
 <div class="register_container">
     <div class="register_container_box">
         <h1>Register</h1>
+        <p>{message}</p>
     </div>
     <div class="register_container_box register_container_box2">
         <label for="name">Name:</label>
-        <input type="text" id="name" name="Name" placeholder="Enter your first name">
+        <input type="text" bind:value={name} id="name" name="Name" placeholder="Enter your first name">
     </div>
     <div class="register_container_box register_container_box2">
         <label for="surname">Surname:</label>
-        <input type="text" id="surname" name="Surname" placeholder="Enter your last name">
+        <input type="text" bind:value={surname} id="surname" name="Surname" placeholder="Enter your last name">
     </div>
     <div class="register_container_box register_container_box2">
         <label for="gender">Gender:</label>
@@ -21,16 +65,16 @@
     </div>
     <div class="register_container_box register_container_box2">
         <label for="email">E-mail:</label>
-        <input type="email" id="email" name="Email" placeholder="Enter your email">
+        <input type="email" bind:value={email} id="email" name="Email" placeholder="Enter your email">
     </div>
     <div class="register_container_box register_container_box2">
         <label for="password">Password:</label>
-        <input type="password" id="password" name="Password" placeholder="Enter your password">
+        <input type="password" bind:value={password} id="password" name="Password" placeholder="Enter your password">
     </div>
     <div class="register_container_box register_container_box3">
         <button type="button" class="btn-secondary">Cancel</button>
         <div>
-            <button type="submit" class="btn-primary">Sign up</button>
+            <button on:click={signUp} class="btn-primary">Sign up</button>
         </div>
     </div>
 </div>

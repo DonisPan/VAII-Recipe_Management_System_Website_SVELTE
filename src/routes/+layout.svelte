@@ -1,8 +1,48 @@
-<script>
-    let user = $state({ loggedIn: false });
-    function toggle() {
-        user.loggedIn = !user.loggedIn;
+<script lang="ts">
+    import { supabase } from '$lib/supabase';
+    let user: { email: string | undefined; role: string | undefined } = { email: undefined, role: undefined }; // Default to no user
+
+    // Check the initial session
+    async function checkUser() {
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (session) {
+            // Fetch the user's role from ck_person
+            const { data: profile, error } = await supabase
+                .from('ck_person')
+                .select('role')
+                .eq('id', session.user.id)
+                .single();
+
+            if (error) {
+                console.error('Error fetching user profile:', error.message);
+                user = { email: session.user.email, role: undefined };
+            } else {
+                user = { email: session.user.email, role: profile.role };
+            }
+        } else {
+            user = { email: undefined, role: undefined };
+        }
     }
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+        if (session) {
+            checkUser();
+        } else {
+            user = { email: undefined, role: undefined };
+        }
+    });
+
+    async function logout() {
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+            console.error('Logout failed:', error.message);
+        } else {
+            console.log('User logged out successfully');
+        }
+    }
+
+    // checkUser();
 </script>
 
 <nav>
@@ -12,7 +52,7 @@
             <ul>
                 <li> <a href="/">Home</a> </li>
                 <li> <a href="/categoriesP">Categories</a> </li>
-                {#if user.loggedIn}
+                {#if user.email}
                     <li> <a href="/profileP">Profile</a> </li>
                     <li> <a href="/favouritesP">Favourites</a> </li>
                 {/if}
@@ -20,20 +60,23 @@
         </div>
         <div class="row right">
             <ul>
-                {#if !user.loggedIn}
+                {#if !user.email}
                     <li> <a href="/loginP">Sign in</a> </li>
-                    <li> <a on:click={toggle} >Sign up</a> </li>
                     <li> <a href="/registerP" >Sign up</a> </li>
                 {:else}
-                    <li> <a on:click={toggle} >Logout</a> </li>
-                    <li> <span>donisvasek@gmail.com</span> </li>
+                    <li> <button onclick={logout} >Logout</button> </li>
+                    <li>
+                        <div class="center">
+                            <span>{user.email}<br></span>
+                            <span>{user.role}</span>
+                        </div>
+                    </li>
                 {/if}
             </ul>
         </div>
     </div>
 </nav>
-<slot />
-
+<slot/>
 <style>
     .container {
         overflow: hidden;
@@ -51,6 +94,7 @@
         z-index: 10;
     }
     .container li {
+        align-items: center;
         padding: 0 1rem;
         width: auto;
         justify-content: center;
@@ -64,8 +108,7 @@
     }
     .container a:hover {
         font-size: 1.3rem;
-        color: var(--tekhelet);
-        text-shadow: var(--mountbatten-pink) 4px 4px;
+        text-shadow: var(--tekhelet) 4px 4px;
     }
     .container p {
         text-decoration: none;
@@ -87,11 +130,31 @@
         justify-content: space-between;
         gap: 1rem;
     }
+    .row button, span {
+        all:unset;
+        text-align: center;
+        text-decoration: none;
+        font-size: 1.2rem;
+        color: #E7D8C5;
+        transition: color 0.3s ease;
+    }
+    .row span {
+        font-size: .9rem;
+    }
+    .row button:hover {
+        font-size: 1.3rem;
+        text-shadow: var(--tekhelet) 4px 4px;
+    }
     .right {
         justify-content: flex-end;
     }
     .left {
         justify-content: flex-start;
+    }
+    .center {
+        all:unset;
+        margin: 0;
+        align-items: center;
     }
 
     /* Mobile-Friendly Layout */

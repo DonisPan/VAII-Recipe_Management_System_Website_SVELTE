@@ -1,19 +1,45 @@
+<script lang="ts">
+    import {supabase} from "$lib/supabase";
+    import { goto } from '$app/navigation';
+
+    let email: string;
+    let password: string;
+    let message: string;
+
+    async function login() {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password
+        });
+
+        if (error) {
+            message = `Login failed: ${error.message}`;
+            console.error(error);
+        } else {
+            message = 'Login successful!';
+            await goto('/');
+            console.log('User session:', data);
+        }
+    }
+</script>
+
 <div class="login_container">
     <div class="login_container_box">
         <h1>Login</h1>
+        <p>{message}</p>
     </div>
     <div class="login_container_box login_container_box2">
         <label for="email">E-mail:</label>
-        <input type="email" id="email" name="Email" placeholder="Enter your email">
+        <input type="email" bind:value={email} id="email" name="Email" placeholder="Enter your email">
     </div>
     <div class="login_container_box login_container_box2">
         <label for="password">Password:</label>
-        <input type="password" id="password" name="Password" placeholder="Enter your password">
+        <input type="password" bind:value={password} id="password" name="Password" placeholder="Enter your password">
     </div>
     <div class="login_container_box login_container_box3">
         <button type="button" class="btn-secondary">Cancel</button>
         <div>
-            <button type="button" class="btn-primary">Sign in</button>
+            <button type="submit" on:click={login} class="btn-primary">Sign in</button>
             <button type="button" class="btn-secondary">Sign up</button>
         </div>
     </div>

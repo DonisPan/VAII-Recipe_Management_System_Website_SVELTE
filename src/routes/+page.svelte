@@ -3,6 +3,7 @@
     import { supabase } from '$lib/supabase';
 
     interface Recipe {
+        id: number;
         name: string;
         image: string;
         ck_difficulty: {
@@ -12,19 +13,29 @@
 
     let recipes: { name: string; image: string; difficulty: string }[] = [];
 
+    import type { PostgrestResponse } from '@supabase/supabase-js';
+
     async function loadRecipes() {
-        const { data } = await supabase
+        const { data, error }: PostgrestResponse<Recipe> = await supabase
             .from('ck_recipe')
             .select(`
+            id,
             name,
             image,
             ck_difficulty (difficulty)
-        `) as { data: Recipe[] };
+        `);
+
+        if (error) {
+            console.error('Error fetching recipes:', error.message);
+            recipes = [];
+            return;
+        }
 
         console.log('Recipes data with difficulty:', data);
 
         // Map data to the required format
         recipes = data.map(recipe => ({
+            id: recipe.id,
             name: recipe.name || 'Default Name',
             image: recipe.image || '/images/default-image.png',
             difficulty: recipe.ck_difficulty?.difficulty || 'Unknown'
@@ -39,7 +50,7 @@
 
 <div class="page-content">
     {#each recipes as recipe}
-        <RecipeCard name={recipe.name} image={recipe.image} difficulty={recipe.difficulty}></RecipeCard>
+        <RecipeCard name={recipe.name} image={recipe.image} difficulty={recipe.difficulty} id={recipe.id}></RecipeCard>
     {/each}
 </div>
 

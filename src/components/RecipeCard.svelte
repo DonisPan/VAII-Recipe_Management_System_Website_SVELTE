@@ -1,10 +1,11 @@
-<script>
-    export let name = "";
+<script lang="ts">
     export let onClick = () => { window.location.href = name };
     export let onMouseover = () => {};
     export let onFocus = () => {};
     export let image = "";
+    export let name = "";
     export let difficulty = "";
+    export let id: number;
 </script>
 
 <button class="recipe-card"
@@ -17,7 +18,7 @@
         <img src="{image}" alt="missing_recipe_image"/>
     </div>
     <div class="recipe-info">
-        <p class="recipe-name">{name}</p>
+        <p class="recipe-name">{name} {id}</p>
         <p class="recipe-difficulty">Difficulty: {difficulty}</p>
     </div>
 </button>
