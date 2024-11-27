@@ -12,14 +12,14 @@
         difficulty: string;
     } | null = $state(null);
 
-    async function loadRecipe(recipe_id: bigint) {
+    async function loadRecipe() {
         const { data, error } = await supabase
             .from('ck_recipe')
             .select('name, description, image, ck_difficulty (difficulty)')
-            .eq('id', recipe_id)
+            .eq('id', id)
             .single();
         if (error) {
-            console.error(`Error fetching recipe with ID ${recipe_id}:`, error.message);
+            console.error(`Error fetching recipe with ID ${id}:`, error.message);
         }
         else {
             recipe = {
@@ -32,7 +32,7 @@
     }
 
     // Load the recipe on mount
-    loadRecipe(id);
+    loadRecipe();
 </script>
 
 <div class="recipe-page">
@@ -45,6 +45,14 @@
         <div class="recipe-description">
             <h2>Recipe Description</h2>
             <p>{recipe.description}</p>
+        </div>
+        <div class="recipe-ingredients">
+            <h2>Recipe Ingredients</h2>
+            <p></p>
+        </div>
+        <div class="recipe-steps">
+            <h2>Recipe Steps</h2>
+            <p></p>
         </div>
     {:else}
         <p>Loading recipe {id}...</p>
@@ -95,9 +103,9 @@
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
     }
 
-    .recipe-description
-    /*.recipe-ingredients,*/
-    /*.recipe-steps */
+    .recipe-description,
+    .recipe-ingredients,
+    .recipe-steps
     {
         background-color: var(--light-dun);
         border-radius: 12px;
