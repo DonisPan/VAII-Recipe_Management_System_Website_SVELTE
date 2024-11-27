@@ -1,26 +1,49 @@
 <script lang="ts">
-    export let onClick = () => { window.location.href = name };
-    export let onMouseover = () => {};
-    export let onFocus = () => {};
-    export let image = "";
-    export let name = "";
-    export let difficulty = "";
-    export let id: number;
+    import { supabase } from '$lib/supabase';
+
+    export let id: bigint;
+
+    let recipe: { name: string; image: string; difficulty: string } | null = null;
+
+    async function loadRecipeDetails() {
+        const { data, error } = await supabase
+            .from('ck_recipe')
+            .select('name, image, ck_difficulty (difficulty)')
+            .eq('id', id)
+            .single();
+
+        if (error) {
+            console.error(`Error loading recipe details for ID ${id}:`, error.message);
+            recipe = null;
+        } else {
+            recipe = {
+                name: data.name || 'Unnamed Recipe',
+                image: data.image || '/images/default-image.png',
+                difficulty: data.ck_difficulty?.difficulty || 'Unknown',
+            };
+        }
+    }
+
+    const handleClick = () => {
+        window.location.href = `/recipeP/${id}`; // Pass `id` as query parameter
+    };
+
+    // Load details on mount
+    loadRecipeDetails();
 </script>
 
-<button class="recipe-card"
-        type="button"
-        tabindex="0"
-        on:click={onClick}
-        on:focus={onFocus}
-        on:mouseover={onMouseover}>
-    <div class="recipe-image">
-        <img src="{image}" alt="missing_recipe_image"/>
-    </div>
-    <div class="recipe-info">
-        <p class="recipe-name">{name} {id}</p>
-        <p class="recipe-difficulty">Difficulty: {difficulty}</p>
-    </div>
+<button class="recipe-card" type="button" on:click={handleClick}>
+    {#if recipe}
+        <div class="recipe-image">
+            <img src={recipe.image} alt="missing_recipe_image" />
+        </div>
+        <div class="recipe-info">
+            <p class="recipe-name">{recipe.name}</p>
+            <p class="recipe-difficulty">Difficulty: {recipe.difficulty}</p>
+        </div>
+    {:else}
+        <p>Loading...</p>
+    {/if}
 </button>
 
 <style>

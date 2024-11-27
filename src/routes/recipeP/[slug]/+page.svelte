@@ -1,39 +1,59 @@
-<script>
-    import {page} from "$app/stores";
-    $: recipe = $page.params.recipeP;
+<script lang="ts">
     import { supabase } from '$lib/supabase';
+    import type { PageData } from './$types';
+
+    let { data }: { data: PageData } = $props();
+    let id = BigInt(data.recipeId);
+
+    let recipe: {
+        name: string;
+        description: string;
+        image: string;
+        difficulty: string;
+    } | null = $state(null);
+
+    async function loadRecipe(recipe_id: bigint) {
+        const { data, error } = await supabase
+            .from('ck_recipe')
+            .select('name, description, image, ck_difficulty (difficulty)')
+            .eq('id', recipe_id)
+            .single();
+        if (error) {
+            console.error(`Error fetching recipe with ID ${recipe_id}:`, error.message);
+        }
+        else {
+            recipe = {
+                name: data.name,
+                description: data.description,
+                image: data.image || '/images/default-recipe-image.png',
+                difficulty: data.ck_difficulty?.difficulty || 'Unknown',
+            };
+        }
+    }
+
+    // Load the recipe on mount
+    loadRecipe(id);
 </script>
 
 <div class="recipe-page">
-    <div class="recipe-header">
-        <h1>{recipe}</h1>
-        <h3>by Who</h3>
-        <img src="/images/imgTest.png" alt="recipe_image"/>
-    </div>
-    <div class="recipe-description">
-        <h2>Recipe Description</h2>
-        <p>This recipe is about recipe haha! A bit more description...</p>
-    </div>
-    <div class="recipe-ingredients">
-        <h2>Ingredients</h2>
-        <ul>
-            <li>1 cup of something</li>
-            <li>2 tbsp of something else</li>
-            <li>3 pinches of magic</li>
-        </ul>
-    </div>
-    <div class="recipe-steps">
-        <h2>Steps</h2>
-        <ol>
-            <li>Do this first.</li>
-            <li>Then do that.</li>
-            <li>Finally, enjoy!</li>
-        </ol>
-    </div>
+    {#if recipe}
+        <div class="recipe-header">
+            <h1>{recipe.name}</h1>
+            <h3>Difficulty: {recipe.difficulty}</h3>
+            <img src={recipe.image} alt="recipe_image" />
+        </div>
+        <div class="recipe-description">
+            <h2>Recipe Description</h2>
+            <p>{recipe.description}</p>
+        </div>
+    {:else}
+        <p>Loading recipe {id}...</p>
+    {/if}
 </div>
 
+
 <style>
-    @import '/static/pallete.css';
+    @import '/pallete.css';
 
     .recipe-page {
         max-width: 850px;
@@ -75,9 +95,10 @@
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
     }
 
-    .recipe-description,
-    .recipe-ingredients,
-    .recipe-steps {
+    .recipe-description
+    /*.recipe-ingredients,*/
+    /*.recipe-steps */
+    {
         background-color: var(--light-dun);
         border-radius: 12px;
         padding: 1.5rem;

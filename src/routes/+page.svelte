@@ -3,54 +3,30 @@
     import { supabase } from '$lib/supabase';
 
     interface Recipe {
-        id: number;
-        name: string;
-        image: string;
-        ck_difficulty: {
-            difficulty: string;
-        } | null; // Handle potential null values
+        id: bigint;
     }
 
-    let recipes: { name: string; image: string; difficulty: string }[] = [];
-
-    import type { PostgrestResponse } from '@supabase/supabase-js';
+    let recipes: Recipe[] = [];
 
     async function loadRecipes() {
-        const { data, error }: PostgrestResponse<Recipe> = await supabase
-            .from('ck_recipe')
-            .select(`
-            id,
-            name,
-            image,
-            ck_difficulty (difficulty)
-        `);
+        const { data, error } = await supabase.from('ck_recipe').select('id');
 
         if (error) {
             console.error('Error fetching recipes:', error.message);
             recipes = [];
-            return;
+        } else {
+            recipes = data.map((recipe) => ({
+                id: BigInt(recipe.id), // Convert to bigint
+            }));
         }
-
-        console.log('Recipes data with difficulty:', data);
-
-        // Map data to the required format
-        recipes = data.map(recipe => ({
-            id: recipe.id,
-            name: recipe.name || 'Default Name',
-            image: recipe.image || '/images/default-image.png',
-            difficulty: recipe.ck_difficulty?.difficulty || 'Unknown'
-        }));
     }
-
-
-
 
     loadRecipes();
 </script>
 
 <div class="page-content">
     {#each recipes as recipe}
-        <RecipeCard name={recipe.name} image={recipe.image} difficulty={recipe.difficulty} id={recipe.id}></RecipeCard>
+        <RecipeCard id={recipe.id} />
     {/each}
 </div>
 
