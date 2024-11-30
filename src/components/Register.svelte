@@ -1,5 +1,6 @@
 <script lang="ts">
     import {supabase} from "$lib/supabase";
+    import {goto} from "$app/navigation";
 
     let name: string;
     let surname: string;
@@ -36,6 +37,7 @@
                 console.error(profileError);
             } else {
                 message = 'Sign up successful! Please check your email to confirm your account.';
+                await goto('/');
             }
         }
     }
@@ -56,7 +58,7 @@
     </div>
     <div class="register_container_box register_container_box2">
         <label for="gender">Gender:</label>
-        <select id="gender" name="gender">
+        <select id="gender" bind:value={gender} name="gender">
             <option value="" disabled selected>Select gender</option>
             <option value="Male">Male</option>
             <option value="Female">Female</option>

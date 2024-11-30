@@ -1,6 +1,8 @@
 <script lang="ts">
     import { supabase } from '$lib/supabase';
-    let user: { email: string | undefined; role: string | undefined } = { email: undefined, role: undefined }; // Default to no user
+    import {onMount} from "svelte";
+    import {goto} from "$app/navigation";
+    let user: { id: string | undefined; email: string | undefined; role: string | undefined } = { id: undefined, email: undefined, role: undefined }; // Default to no user
 
     // Check the initial session
     async function checkUser() {
@@ -10,18 +12,20 @@
             // Fetch the user's role from ck_person
             const { data: profile, error } = await supabase
                 .from('ck_person')
-                .select('role')
+                .select('role, id')
                 .eq('id', session.user.id)
                 .single();
 
             if (error) {
                 console.error('Error fetching user profile:', error.message);
-                user = { email: session.user.email, role: undefined };
+                user = { id: undefined, email: undefined, role: undefined };
             } else {
-                user = { email: session.user.email, role: profile.role };
+                user = { id: profile.id, email: session.user.email, role: profile.role };
+                sessionStorage.setItem('user', JSON.stringify(user.id));
+                sessionStorage.setItem('role', JSON.stringify(user.role));
             }
         } else {
-            user = { email: undefined, role: undefined };
+            user = { id: undefined, email: undefined, role: undefined };
         }
     }
 
@@ -29,7 +33,10 @@
         if (session) {
             checkUser();
         } else {
-            user = { email: undefined, role: undefined };
+            user = { id: undefined, email: undefined, role: undefined };
+            // sessionStorage.setItem('user', JSON.stringify(user.id));
+            // sessionStorage.setItem('role', JSON.stringify(user.role));
+            // sessionStorage.clear();
         }
     });
 
@@ -38,10 +45,14 @@
         if (error) {
             console.error('Logout failed:', error.message);
         } else {
+            sessionStorage.clear();
             console.log('User logged out successfully');
+            await goto('/');
         }
     }
-
+    onMount(() => {
+        checkUser();
+    })
     // checkUser();
 </script>
 

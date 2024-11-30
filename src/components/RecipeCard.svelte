@@ -8,7 +8,7 @@
     async function loadRecipeDetails() {
         const { data, error } = await supabase
             .from('ck_recipe')
-            .select('name, image, ck_difficulty (difficulty)')
+            .select('name, image, difficulty')
             .eq('id', id)
             .single();
 
@@ -16,10 +16,19 @@
             console.error(`Error loading recipe details for ID ${id}:`, error.message);
             recipe = null;
         } else {
+            // Default values
+            let imageUrl = '/images/default-image.png';
+
+            // Retrieve the public URL for the image
+            if (data.image) {
+                const { data: publicData } = supabase.storage.from('images').getPublicUrl(data.image);
+                imageUrl = publicData.publicUrl || imageUrl;
+            }
+
             recipe = {
                 name: data.name || 'Unnamed Recipe',
-                image: data.image || '/images/default-image.png',
-                difficulty: data.ck_difficulty?.difficulty || 'Unknown',
+                image: imageUrl,
+                difficulty: data.difficulty || 'Unknown',
             };
         }
     }
