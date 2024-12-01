@@ -12,6 +12,7 @@
 
 <style>
     @import "/static/pallete.css";
+
     .page-content {
         display: flex;
         flex-wrap: wrap;

@@ -89,6 +89,8 @@
 </nav>
 <slot/>
 <style>
+    @import '/pallete.css';
+
     .container {
         overflow: hidden;
         width: 100%;

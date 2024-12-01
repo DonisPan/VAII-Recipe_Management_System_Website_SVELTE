@@ -7,6 +7,7 @@
 </div>
 
 <style>
+    @import '/pallete.css';
     .page-container {
         margin: 0;
         display: flex;
