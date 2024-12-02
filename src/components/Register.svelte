@@ -1,18 +1,36 @@
 <script lang="ts">
-    import {supabase} from "$lib/supabase";
-    import {goto} from "$app/navigation";
+    import { supabase } from "$lib/supabase";
+    import { goto } from "$app/navigation";
+    import { z } from "zod";
 
-    let name: string;
-    let surname: string;
-    let email: string;
-    let password: string;
-    let gender: string;
-    let message: string;
+    let name: string = "";
+    let surname: string = "";
+    let email: string = "";
+    let password: string = "";
+    let gender: string = "";
+    let message: string = "";
+
+    const signUpSchema = z.object({
+        name: z.string().min(1, "Name is required."),
+        surname: z.string().min(1, "Surname is required."),
+        email: z.string().email("Invalid email address."),
+        password: z.string().min(6, "Password must be at least 6 characters long."),
+        gender: z.enum(["Male", "Female", "Other"], { invalid_type_error: "Gender is required." }),
+    });
 
     async function signUp() {
+        const validationResult = signUpSchema.safeParse({ name, surname, email, password, gender });
+
+        if (!validationResult.success) {
+            const errors = validationResult.error.errors.map((err) => err.message).join(", ");
+            message = `Validation failed: ${errors}`;
+            console.error(errors);
+            return;
+        }
+
         const { data: userData, error: authError } = await supabase.auth.signUp({
             email,
-            password
+            password,
         });
 
         if (authError) {
@@ -23,31 +41,29 @@
 
         if (userData.user) {
             const { error: profileError } = await supabase
-                .from('ck_person')
+                .from("ck_person")
                 .insert({
                     id: userData.user.id,
                     name,
                     surname,
-                    gender
+                    gender,
                 });
 
             if (profileError) {
                 message = `Failed to save profile: ${profileError.message}`;
                 console.error(profileError);
-
             } else {
-                message = 'Sign up successful!';
-                await goto('/');
+                message = "Sign up successful!";
+                await goto("/");
             }
         }
     }
 </script>
 
 <div class="register_container">
-
     <div class="register_container_box">
         <h1>Register</h1>
-        <p>{message}</p>
+        <p class="error-message">{message}</p>
     </div>
 
     <div class="register_container_box register_container_box2">
@@ -63,7 +79,7 @@
     <div class="register_container_box register_container_box2">
         <label for="gender">Gender:</label>
         <select id="gender" bind:value={gender} name="gender">
-            <option value="" disabled selected>Select gender</option>
+            <option value="" disabled>Select gender</option>
             <option value="Male">Male</option>
             <option value="Female">Female</option>
             <option value="Other">Other</option>
@@ -86,9 +102,7 @@
         <div>
             <button on:click={signUp} class="btn-primary">Sign up</button>
         </div>
-
     </div>
-
 </div>
 
 <style>
