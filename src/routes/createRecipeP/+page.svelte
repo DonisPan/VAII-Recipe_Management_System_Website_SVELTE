@@ -1,12 +1,12 @@
 <script lang="ts">
     import { supabase } from '$lib/supabase';
+    import {goto} from "$app/navigation";
 
     let name: string;
     let description: string;
     let difficulty: string;
     let imageFile: File | null = null;
 
-    // Handle file input
     function handleFileInput(event: Event) {
         const target = event.target as HTMLInputElement;
         if (target?.files?.[0]) {
@@ -14,7 +14,6 @@
         }
     }
 
-    // Submit the recipe to the database
     async function createRecipe() {
         console.log("CREATE RECIPE")
         if (!name || !description || !difficulty) {
@@ -32,6 +31,7 @@
                 console.error('Error uploading image:', error.message);
                 return;
             }
+
             imagePath = data?.path;
         }
 
@@ -43,34 +43,42 @@
         });
 
         if (error) {
-            console.error('Error saving recipe:', error.message);
+            console.error('Error with saving recipe:', error.message);
             return;
         }
 
         alert('Recipe created successfully!');
-        window.location.href = '/'; // Redirect to the main page
+        await goto('/')
     }
 </script>
 
 <div class="recipe-page">
+
     <div class="recipe-header">
         <h1>Create a New Recipe</h1>
     </div>
+
     <form on:submit|preventDefault={createRecipe}>
+
         <div class="recipe-input-group">
             <label for="name">Recipe Name</label>
             <input id="name" type="text" bind:value={name} placeholder="Enter recipe name" required />
         </div>
+
         <div class="recipe-input-group">
             <label for="image">Recipe Image</label>
             <input id="image" type="file" accept="image/*" on:change={handleFileInput} />
         </div>
+
         <div class="recipe-input-group">
             <label for="description">Description</label>
             <textarea id="description" bind:value={description} placeholder="Enter description" required></textarea>
         </div>
+
         <div class="recipe-input-group">
+
             <label for="difficulty">Difficulty</label>
+
             <select id="difficulty" bind:value={difficulty}>
                 <option value="" disabled selected>Select difficulty</option>
                 <option value="Easy">Easy</option>
@@ -78,11 +86,15 @@
                 <option value="Hard">Hard</option>
                 <option value="Insane">Insane</option>
             </select>
+
         </div>
+
         <div class="recipe-actions">
             <button type="submit">Create Recipe</button>
         </div>
+
     </form>
+
 </div>
 
 <style>
