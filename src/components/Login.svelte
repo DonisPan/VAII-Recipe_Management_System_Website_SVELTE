@@ -1,12 +1,26 @@
 <script lang="ts">
-    import {supabase} from "$lib/supabase";
+    import { supabase } from "$lib/supabase";
     import { goto } from '$app/navigation';
+    import { z } from 'zod';
 
-    let email: string;
-    let password: string;
-    let message: string;
+    let email: string = '';
+    let password: string = '';
+    let message: string = '';
+
+    const loginSchema = z.object({
+        email: z.string().email('Please enter a valid email address.'),
+        password: z.string().min(6, 'Password must be at least 6 characters long.'),
+    });
 
     async function login() {
+        const validationResult = loginSchema.safeParse({ email, password });
+
+        if (!validationResult.success) {
+            const errors = validationResult.error.errors.map(err => err.message).join(', ');
+            message = `Validation failed: ${errors}`;
+            return;
+        }
+
         const { error } = await supabase.auth.signInWithPassword({
             email,
             password
@@ -14,8 +28,7 @@
 
         if (error) {
             message = `Login failed: ${error.message}`;
-            console.error(error);
-
+            return;
         } else {
             message = 'Login successful!';
             await goto('/');
@@ -24,10 +37,9 @@
 </script>
 
 <div class="login_container">
-
     <div class="login_container_box">
         <h1>Login</h1>
-        <p>{message}</p>
+        <p class="error-message">{message}</p>
     </div>
 
     <div class="login_container_box login_container_box2">
@@ -47,10 +59,9 @@
             <button type="submit" on:click={login} class="btn-primary">Sign in</button>
             <button type="button" class="btn-secondary">Sign up</button>
         </div>
-
     </div>
-
 </div>
+
 
 <style>
     .login_container {
