@@ -8,6 +8,7 @@
 
     let recipes: Recipe[] = [];
 
+    // LOAD RECIPES
     async function loadRecipes() {
         const { data, error } = await supabase.from('ck_recipe').select('id');
 
@@ -16,7 +17,7 @@
             recipes = [];
         } else {
             recipes = data.map((recipe) => ({
-                id: BigInt(recipe.id), // Convert to bigint
+                id: BigInt(recipe.id),
             }));
         }
     }
@@ -25,9 +26,11 @@
 </script>
 
 <div class="page-content">
+
     {#each recipes as recipe}
         <RecipeCard id={recipe.id} />
     {/each}
+
 </div>
 
 <style>
