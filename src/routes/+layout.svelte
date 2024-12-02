@@ -2,14 +2,14 @@
     import { supabase } from '$lib/supabase';
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
-    let user: { id: string | undefined; email: string | undefined; role: string | undefined } = { id: undefined, email: undefined, role: undefined }; // Default to no user
 
-    // Check the initial session
+    let user: { id: string | undefined; email: string | undefined; role: string | undefined } = { id: undefined, email: undefined, role: undefined };
+
+    // CHECK USER
     async function checkUser() {
         const { data: { session } } = await supabase.auth.getSession();
 
         if (session) {
-            // Fetch the user's role from ck_person
             const { data: profile, error } = await supabase
                 .from('ck_person')
                 .select('role, id')
@@ -19,6 +19,7 @@
             if (error) {
                 console.error('Error fetching user profile:', error.message);
                 user = { id: undefined, email: undefined, role: undefined };
+
             } else {
                 user = { id: profile.id, email: session.user.email, role: profile.role };
                 sessionStorage.setItem('user', JSON.stringify(user.id));
@@ -29,17 +30,21 @@
         }
     }
 
+    // SESSION CHANGE
     supabase.auth.onAuthStateChange((_event, session) => {
         if (session) {
             checkUser();
         } else {
             user = { id: undefined, email: undefined, role: undefined };
-            // sessionStorage.setItem('user', JSON.stringify(user.id));
-            // sessionStorage.setItem('role', JSON.stringify(user.role));
-            // sessionStorage.clear();
         }
     });
 
+    // // CHECK ROLE
+    function checkRole(): boolean {
+        return user.role == 'cook' || user.role == 'superadmin';
+    }
+
+    // LOGOUT
     async function logout() {
         const { error } = await supabase.auth.signOut();
         if (error) {
@@ -50,44 +55,63 @@
             await goto('/');
         }
     }
+
+    // ON MOUNT
     onMount(() => {
         checkUser();
     })
-    // checkUser();
 </script>
 
 <nav>
     <div class="container">
+
         <p>Cookerino!</p>
+
         <div class="row left">
+
             <ul>
                 <li> <a href="/">Home</a> </li>
                 <li> <a href="/categoriesP">Categories</a> </li>
+
+                {#if checkRole()}
+                    <li> <a href="/createRecipeP">Create Recipe</a> </li>
+                {/if}
+
                 {#if user.email}
                     <li> <a href="/profileP">Profile</a> </li>
                     <li> <a href="/favouritesP">Favourites</a> </li>
                 {/if}
             </ul>
+
         </div>
+
         <div class="row right">
             <ul>
+
                 {#if !user.email}
                     <li> <a href="/loginP">Sign in</a> </li>
                     <li> <a href="/registerP" >Sign up</a> </li>
                 {:else}
+
                     <li> <button onclick={logout} >Logout</button> </li>
+
                     <li>
                         <div class="center">
                             <span>{user.email}<br></span>
                             <span>{user.role}</span>
                         </div>
                     </li>
+
                 {/if}
+
             </ul>
         </div>
+
     </div>
 </nav>
+
 <slot/>
+
 <style>
     @import '/pallete.css';
 
@@ -170,7 +194,6 @@
         align-items: center;
     }
 
-    /* Mobile-Friendly Layout */
     @media (max-width: 768px) {
         .container {
             flex-direction: column;
@@ -196,7 +219,6 @@
         }
     }
 
-    /* Extra Mobile Styling for Compact View */
     @media (max-width: 400px) {
         .container a {
             font-size: 1rem;
