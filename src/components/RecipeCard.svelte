@@ -1,5 +1,6 @@
 <script lang="ts">
     import { supabase } from '$lib/supabase';
+    import {onMount} from "svelte";
 
     export let id: bigint;
 
@@ -13,13 +14,13 @@
             .single();
 
         if (error) {
-            console.error(`Error loading recipe details for ID ${id}:`, error.message);
+            console.error(`Error fetching recipe details for ID ${id}:`, error.message);
             recipe = null;
-        } else {
-            // Default values
-            let imageUrl = '/images/default-image.png';
 
-            // Retrieve the public URL for the image
+        } else {
+            let imageUrl = '/images/default-image.jpg';
+
+            // GET IMAGE FROM SUPABASE CONTAINER
             if (data.image) {
                 const { data: publicData } = supabase.storage.from('images').getPublicUrl(data.image);
                 imageUrl = publicData.publicUrl || imageUrl;
@@ -34,25 +35,31 @@
     }
 
     const handleClick = () => {
-        window.location.href = `/recipeP/${id}`; // Pass `id` as query parameter
+        window.location.href = `/recipeP/${id}`;
     };
 
-    // Load details on mount
+    onMount(() => {
     loadRecipeDetails();
+    })
 </script>
 
 <button class="recipe-card" type="button" on:click={handleClick}>
+
     {#if recipe}
+
         <div class="recipe-image">
             <img src={recipe.image} alt="missing_recipe_image" />
         </div>
+
         <div class="recipe-info">
             <p class="recipe-name">{recipe.name}</p>
             <p class="recipe-difficulty">Difficulty: {recipe.difficulty}</p>
         </div>
+
     {:else}
         <p>Loading...</p>
     {/if}
+
 </button>
 
 <style>
