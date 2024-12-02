@@ -1,6 +1,7 @@
 <script lang="ts">
     import { supabase } from '$lib/supabase';
     import {onMount} from "svelte";
+    import {goto} from "$app/navigation";
 
     export let id: bigint;
 
@@ -35,7 +36,7 @@
     }
 
     const handleClick = () => {
-        window.location.href = `/recipeP/${id}`;
+        goto(`/recipeP/${id}`)
     };
 
     onMount(() => {
