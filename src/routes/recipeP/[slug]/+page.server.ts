@@ -1,7 +1,7 @@
 import { supabase } from '$lib/supabase';
 import type {PageServerLoad, Actions} from './$types';
 
-export const load: PageServerLoad = async ({params, locals}) => {
+export const load: PageServerLoad = async ({params, locals}): Promise<any> => {
     const id = BigInt(params.slug);
 
     const { data: recipeData, error: recipeError } = await supabase
