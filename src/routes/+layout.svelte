@@ -6,28 +6,9 @@
     export let data: LayoutData;
     let { user } = data;
 
-    console.log('IN LAYOUT: ', user?.id, user?.role);
-
     // CHECK ROLE
     function checkRole(): boolean {
         return user.role == 'cook' || user.role == 'superadmin';
-    }
-
-    // LOGOUT CLIENT SIDE
-    // async function logout() {
-    //     const { error } = await supabase.auth.signOut();
-    //     if (error) {
-    //         console.error('Logout failed:', error.message);
-    //     } else {
-    //         sessionStorage.clear();
-    //         console.log('User logged out successfully');
-    //         await goto('/');
-    //     }
-    // }
-    // FOR BUTTON TO PERSIST
-    async function logout() {
-        console.log('LOGOUT');
-
     }
 </script>
 

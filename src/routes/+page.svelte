@@ -1,12 +1,12 @@
 <script lang="ts">
     import RecipeCard from "../components/RecipeCard.svelte";
-    export let data: { recipes: { id: bigint }[] };
+    export let data: { recipes: { id: bigint, name: string, image: string, difficulty: string } [] };
 </script>
 
 <div class="page-content">
 
     {#each data.recipes as recipe}
-        <RecipeCard id={recipe.id} />
+        <RecipeCard id={recipe.id} name={recipe.name} image={recipe.image} difficulty={recipe.difficulty} />
     {/each}
 
 </div>

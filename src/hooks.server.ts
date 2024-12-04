@@ -12,7 +12,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 
     if (accessToken) {
         try {
-            // Validate the access token and fetch the user
             const { data: user, error } = await supabase.auth.getUser(accessToken);
 
             if (error) {
@@ -21,8 +20,6 @@ export const handle: Handle = async ({ event, resolve }) => {
                 event.locals.currentRole = null;
                 event.locals.currentName = null;
             } else if (user?.user) {
-
-                // Fetch additional user details from your database
 
                 const { data: profile, error: profileError } = await supabase
                     .from('ck_person')
@@ -39,7 +36,6 @@ export const handle: Handle = async ({ event, resolve }) => {
                     event.locals.currentUser = profile.id;
                     event.locals.currentRole = profile.role;
                     event.locals.currentName = profile.name;
-                    console.log('User Profile:', profile);
                 }
             }
         } catch (err) {

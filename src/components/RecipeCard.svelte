@@ -1,60 +1,27 @@
 <script lang="ts">
-    import { supabase } from '$lib/supabase';
-    import {onMount} from "svelte";
     import {goto} from "$app/navigation";
 
     export let id: bigint;
-
-    let recipe: { name: string; image: string; difficulty: string } | null = null;
-
-    async function loadRecipeDetails() {
-        const { data, error } = await supabase
-            .from('ck_recipe')
-            .select('name, image, difficulty')
-            .eq('id', id)
-            .single();
-
-        if (error) {
-            console.error(`Error fetching recipe details for ID ${id}:`, error.message);
-            recipe = null;
-
-        } else {
-            let imageUrl = '/images/default-image.jpg';
-
-            // GET IMAGE FROM SUPABASE CONTAINER
-            if (data.image) {
-                const { data: publicData } = supabase.storage.from('images').getPublicUrl(data.image);
-                imageUrl = publicData.publicUrl || imageUrl;
-            }
-
-            recipe = {
-                name: data.name || 'Unnamed Recipe',
-                image: imageUrl,
-                difficulty: data.difficulty || 'Unknown',
-            };
-        }
-    }
+    export let name: string;
+    export let image: string;
+    export let difficulty: string;
 
     const handleClick = () => {
         goto(`/recipeP/${id}`)
     };
-
-    onMount(() => {
-    loadRecipeDetails();
-    })
 </script>
 
 <button class="recipe-card" type="button" on:click={handleClick}>
 
-    {#if recipe}
+    {#if id}
 
         <div class="recipe-image">
-            <img src={recipe.image} alt="missing_recipe_image" />
+            <img src={image} alt="missing_recipe_image" />
         </div>
 
         <div class="recipe-info">
-            <p class="recipe-name">{recipe.name}</p>
-            <p class="recipe-difficulty">Difficulty: {recipe.difficulty}</p>
+            <p class="recipe-name">{name}</p>
+            <p class="recipe-difficulty">Difficulty: {difficulty}</p>
         </div>
 
     {:else}

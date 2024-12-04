@@ -7,7 +7,7 @@ const recipeSchema = z.object({
     name: z.string().min(1, 'Recipe name is required.'),
     description: z.string().min(1, 'Description is required.'),
     difficulty: z.enum(['Easy', 'Medium', 'Hard', 'Insane']),
-    imageFile: z.instanceof(File).optional(),
+    imageFile: z.instanceof(File),
 });
 
 export const actions: Actions = {
