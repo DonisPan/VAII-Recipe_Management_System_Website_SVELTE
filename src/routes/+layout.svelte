@@ -1,4 +1,24 @@
 <script lang="ts">
+
+    // export let user: { id: string | null; name: string | null; role: string | null };
+    //
+    // console.log('USER RECEIVED IN LAYOUT: ', user);
+    //
+    // async function logout() {
+    //     const response = await fetch('/logout', { method: 'POST' });
+    //
+    //     if (response.ok) {
+    //         console.log('User logged out successfully');
+    //         window.location.href = '/';
+    //     } else {
+    //         console.error('Logout failed');
+    //     }
+    // }
+
+    // function checkRole(): boolean {
+    //     return user.role === 'cook' || user.role === 'superadmin';
+    // }
+
     import { supabase } from '$lib/supabase';
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
@@ -8,6 +28,7 @@
     // CHECK USER
     async function checkUser() {
         const { data: { session } } = await supabase.auth.getSession();
+        // console.log(session?.user);
 
         if (session) {
             const { data: profile, error } = await supabase
@@ -22,8 +43,8 @@
 
             } else {
                 user = { id: profile.id, email: session.user.email, role: profile.role };
-                sessionStorage.setItem('user', JSON.stringify(user.id));
-                sessionStorage.setItem('role', JSON.stringify(user.role));
+                // sessionStorage.setItem('user', JSON.stringify(user.id));
+                // sessionStorage.setItem('role', JSON.stringify(user.role));
             }
         } else {
             user = { id: undefined, email: undefined, role: undefined };

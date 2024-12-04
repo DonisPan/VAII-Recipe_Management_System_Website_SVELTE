@@ -1,7 +1,7 @@
 import { supabase } from '$lib/supabase';
 import type {PageServerLoad, Actions} from './$types';
 
-export const load: PageServerLoad = async ({params}) => {
+export const load: PageServerLoad = async ({params, locals}) => {
     const id = BigInt(params.slug);
 
     const { data: recipeData, error: recipeError } = await supabase
@@ -41,8 +41,9 @@ export const load: PageServerLoad = async ({params}) => {
         image: imageUrl,
         difficulty: recipeData.difficulty || 'Unknown',
     };
-
-    return { recipe, id };
+    let currentUser = locals.currentUser;
+    let currentRole = locals.currentRole;
+    return { recipe, id, currentUser, currentRole };
 };
 
 export const actions: Actions = {

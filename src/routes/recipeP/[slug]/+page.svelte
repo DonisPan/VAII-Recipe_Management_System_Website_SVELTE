@@ -1,7 +1,9 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
     import {onMount} from "svelte";
-    export let data: { recipe: any, id: any };
+    export let data: { recipe: any, id: any, currentUser: any, currentRole: any };
+    const currentUser = data.currentUser;
+    const currentRole = data.currentRole;
 
     let isEditing = false;
     let recipe = data.recipe;
@@ -11,12 +13,12 @@
         isEditing = !isEditing;
     }
 
-    let currentUser: string | null = null;
-    let currentRole: string | null = null;
+    // let currentUser: string | null = null;
+    // let currentRole: string | null = null;
 
     onMount(() => {
-        currentUser = JSON.parse(sessionStorage.getItem('user') || 'null');
-        currentRole = JSON.parse(sessionStorage.getItem('role') || 'null');
+        // currentUser = JSON.parse(sessionStorage.getItem('user') || 'null');
+        // currentRole = JSON.parse(sessionStorage.getItem('role') || 'null');
     });
 
     async function deleteRecipe() {

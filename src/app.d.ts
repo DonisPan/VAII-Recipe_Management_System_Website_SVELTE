@@ -6,8 +6,10 @@ declare global {
 	namespace App {
 		// interface Error {}
 		interface Locals {
-			currentUser: string;
-			currentRole: string;
+			currentUser: string | null;
+			currentRole: string | null;
+			currentEmail: string | null;
+			currentName: string | null;
 		}
 		 interface PageData {
 			 supabase: SupabaseClient

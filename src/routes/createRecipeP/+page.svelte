@@ -1,92 +1,42 @@
 <script lang="ts">
-    import { supabase } from '$lib/supabase';
-    import {goto} from "$app/navigation";
-
-    let name: string;
-    let description: string;
-    let difficulty: string;
-    let imageFile: File | null = null;
-
-    function handleFileInput(event: Event) {
-        const target = event.target as HTMLInputElement;
-        if (target?.files?.[0]) {
-            imageFile = target.files[0];
-        }
-    }
-
-    async function createRecipe() {
-        console.log("CREATE RECIPE")
-        if (!name || !description || !difficulty) {
-            alert('Please fill all the fields.');
-            return;
-        }
-
-        let imagePath = null;
-        if (imageFile) {
-            const { data, error } = await supabase.storage
-                .from('images')
-                .upload(`public/${Date.now()}_${imageFile.name}`, imageFile);
-
-            if (error) {
-                console.error('Error uploading image:', error.message);
-                return;
-            }
-
-            imagePath = data?.path;
-        }
-
-        const { error } = await supabase.from('ck_recipe').insert({
-            name: name,
-            description,
-            image: imagePath,
-            difficulty: difficulty,
-        });
-
-        if (error) {
-            console.error('Error with saving recipe:', error.message);
-            return;
-        }
-
-        alert('Recipe created successfully!');
-        await goto('/')
-    }
+    export let error: { error: string } | null = null;
 </script>
 
 <div class="recipe-page">
 
     <div class="recipe-header">
         <h1>Create a New Recipe</h1>
+        {#if error?.error}
+            <p class="error-message">{error.error}</p>
+        {/if}
     </div>
 
-    <form on:submit|preventDefault={createRecipe}>
+    <form method="POST" action="?/createRecipe" enctype="multipart/form-data">
 
         <div class="recipe-input-group">
             <label for="name">Recipe Name</label>
-            <input id="name" type="text" bind:value={name} placeholder="Enter recipe name" required />
+            <input id="name" name="name" type="text" placeholder="Enter recipe name" required />
         </div>
 
         <div class="recipe-input-group">
             <label for="image">Recipe Image</label>
-            <input id="image" type="file" accept="image/*" on:change={handleFileInput} required/>
+            <input id="image" name="image" type="file" accept="image/*" required />
         </div>
 
         <div class="recipe-input-group">
             <label for="description">Description</label>
-            <textarea id="description" bind:value={description} placeholder="Enter description" required></textarea>
+            <textarea id="description" name="description" placeholder="Enter description" required></textarea>
         </div>
 
         <div class="recipe-input-group">
-
             <label for="difficulty">Difficulty</label>
-
-            <select id="difficulty" bind:value={difficulty}>
+            <select id="difficulty" name="difficulty" required>
                 <option value="" disabled selected>Select difficulty</option>
                 <option value="Easy">Easy</option>
                 <option value="Medium">Medium</option>
                 <option value="Hard">Hard</option>
                 <option value="Insane">Insane</option>
             </select>
-
         </div>
 
         <div class="recipe-actions">
@@ -96,6 +46,7 @@
     </form>
 
 </div>
+
 
 <style>
     @import '/pallete.css';

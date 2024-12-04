@@ -1,109 +1,57 @@
 <script lang="ts">
-    import { supabase } from "$lib/supabase";
-    import { goto } from "$app/navigation";
-    import { z } from "zod";
-
-    let name: string = "";
-    let surname: string = "";
-    let email: string = "";
-    let password: string = "";
-    let gender: string = "";
-    let message: string = "";
-
-    const signUpSchema = z.object({
-        name: z.string().min(1, "Name is required."),
-        surname: z.string().min(1, "Surname is required."),
-        email: z.string().email("Invalid email address."),
-        password: z.string().min(6, "Password must be at least 6 characters long."),
-        gender: z.enum(["Male", "Female", "Other"], { invalid_type_error: "Gender is required." }),
-    });
-
-    async function signUp() {
-        const validationResult = signUpSchema.safeParse({ name, surname, email, password, gender });
-
-        if (!validationResult.success) {
-            const errors = validationResult.error.errors.map((err) => err.message).join(", ");
-            message = `Validation failed: ${errors}`;
-            console.error(errors);
-            return;
-        }
-
-        const { data: userData, error: authError } = await supabase.auth.signUp({
-            email,
-            password,
-        });
-
-        if (authError) {
-            message = `Sign up failed: ${authError.message}`;
-            console.error(authError);
-            return;
-        }
-
-        if (userData.user) {
-            const { error: profileError } = await supabase
-                .from("ck_person")
-                .insert({
-                    id: userData.user.id,
-                    name,
-                    surname,
-                    gender,
-                });
-
-            if (profileError) {
-                message = `Failed to save profile: ${profileError.message}`;
-                console.error(profileError);
-            } else {
-                message = "Sign up successful!";
-                await goto("/");
-            }
-        }
-    }
+    export let error: string | null = null;
+    export let success: boolean = false;
 </script>
 
 <div class="register_container">
-    <div class="register_container_box">
-        <h1>Register</h1>
-        <p class="error-message">{message}</p>
-    </div>
-
-    <div class="register_container_box register_container_box2">
-        <label for="name">Name:</label>
-        <input type="text" bind:value={name} id="name" name="Name" placeholder="Enter your first name">
-    </div>
-
-    <div class="register_container_box register_container_box2">
-        <label for="surname">Surname:</label>
-        <input type="text" bind:value={surname} id="surname" name="Surname" placeholder="Enter your last name">
-    </div>
-
-    <div class="register_container_box register_container_box2">
-        <label for="gender">Gender:</label>
-        <select id="gender" bind:value={gender} name="gender">
-            <option value="" disabled>Select gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-        </select>
-    </div>
-
-    <div class="register_container_box register_container_box2">
-        <label for="email">E-mail:</label>
-        <input type="email" bind:value={email} id="email" name="Email" placeholder="Enter your email">
-    </div>
-
-    <div class="register_container_box register_container_box2">
-        <label for="password">Password:</label>
-        <input type="password" bind:value={password} id="password" name="Password" placeholder="Enter your password">
-    </div>
-
-    <div class="register_container_box register_container_box3">
-        <button type="button" class="btn-secondary">Cancel</button>
-
-        <div>
-            <button on:click={signUp} class="btn-primary">Sign up</button>
+    <form method="POST" action="?/signUp">
+        <div class="register_container_box">
+            <h1>Register</h1>
+            {#if error}
+                <p class="error-message">{error}</p>
+            {/if}
+            {#if success}
+                <p class="success-message">Sign up successful! You can now log in.</p>
+            {/if}
         </div>
-    </div>
+
+        <div class="register_container_box register_container_box2">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" placeholder="Enter your first name" required>
+        </div>
+
+        <div class="register_container_box register_container_box2">
+            <label for="surname">Surname:</label>
+            <input type="text" id="surname" name="surname" placeholder="Enter your last name" required>
+        </div>
+
+        <div class="register_container_box register_container_box2">
+            <label for="gender">Gender:</label>
+            <select id="gender" name="gender" required>
+                <option value="" disabled selected>Select gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <div class="register_container_box register_container_box2">
+            <label for="email">E-mail:</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+        </div>
+
+        <div class="register_container_box register_container_box2">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+        </div>
+
+        <div class="register_container_box register_container_box3">
+            <button type="reset" class="btn-secondary">Cancel</button>
+            <button type="submit" class="btn-primary">Sign up</button>
+        </div>
+    </form>
 </div>
+
 
 <style>
     .register_container {
