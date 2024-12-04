@@ -1,65 +1,53 @@
-<script lang="ts">
+<script lang="ts" context="module">
+    import type { LayoutData } from './$types';
+</script>
 
-    // export let user: { id: string | null; name: string | null; role: string | null };
+<script lang="ts">
+    import { supabase } from '$lib/supabase';
+    import {goto} from "$app/navigation";
+
+    export let data: LayoutData; // Access the load function data
+    let { user } = data; // Destructure user from data
+    user.id = null;
+
+    // Make sure to use the user after it has been set
+    console.log('IN LAYOUT: ', user?.id, user?.role);
+
+    // CHECK USER
+    // async function checkUser() {
+    //     const { data: { session } } = await supabase.auth.getSession();
+    //     // console.log(session?.user);
     //
-    // console.log('USER RECEIVED IN LAYOUT: ', user);
+    //     if (session) {
+    //         const { data: profile, error } = await supabase
+    //             .from('ck_person')
+    //             .select('role, id')
+    //             .eq('id', session.user.id)
+    //             .single();
     //
-    // async function logout() {
-    //     const response = await fetch('/logout', { method: 'POST' });
+    //         if (error) {
+    //             console.error('Error fetching user profile:', error.message);
+    //             user = { id: undefined, email: undefined, role: undefined };
     //
-    //     if (response.ok) {
-    //         console.log('User logged out successfully');
-    //         window.location.href = '/';
+    //         } else {
+    //             user = { id: profile.id, email: session.user.email, role: profile.role };
+    //             // sessionStorage.setItem('user', JSON.stringify(user.id));
+    //             // sessionStorage.setItem('role', JSON.stringify(user.role));
+    //         }
     //     } else {
-    //         console.error('Logout failed');
+    //         user = { id: undefined, email: undefined, role: undefined };
     //     }
     // }
 
-    // function checkRole(): boolean {
-    //     return user.role === 'cook' || user.role === 'superadmin';
-    // }
-
-    import { supabase } from '$lib/supabase';
-    import {onMount} from "svelte";
-    import {goto} from "$app/navigation";
-
-    let user: { id: string | undefined; email: string | undefined; role: string | undefined } = { id: undefined, email: undefined, role: undefined };
-
-    // CHECK USER
-    async function checkUser() {
-        const { data: { session } } = await supabase.auth.getSession();
-        // console.log(session?.user);
-
-        if (session) {
-            const { data: profile, error } = await supabase
-                .from('ck_person')
-                .select('role, id')
-                .eq('id', session.user.id)
-                .single();
-
-            if (error) {
-                console.error('Error fetching user profile:', error.message);
-                user = { id: undefined, email: undefined, role: undefined };
-
-            } else {
-                user = { id: profile.id, email: session.user.email, role: profile.role };
-                // sessionStorage.setItem('user', JSON.stringify(user.id));
-                // sessionStorage.setItem('role', JSON.stringify(user.role));
-            }
-        } else {
-            user = { id: undefined, email: undefined, role: undefined };
-        }
-    }
-
     // SESSION CHANGE
-    supabase.auth.onAuthStateChange((_event, session) => {
-        if (session) {
-
-            checkUser();
-        } else {
-            user = { id: undefined, email: undefined, role: undefined };
-        }
-    });
+    // supabase.auth.onAuthStateChange((_event, session) => {
+    //     if (session) {
+    //
+    //         checkUser();
+    //     } else {
+    //         user = { id: undefined, email: undefined, role: undefined };
+    //     }
+    // });
 
     // // CHECK ROLE
     function checkRole(): boolean {
@@ -79,9 +67,9 @@
     }
 
     // ON MOUNT
-    onMount(() => {
-        checkUser();
-    })
+    // onMount(() => {
+    //     checkUser();
+    // })
 </script>
 
 <nav>
@@ -99,7 +87,7 @@
                     <li> <a href="/createRecipeP">Create Recipe</a> </li>
                 {/if}
 
-                {#if user.email}
+                {#if user.id}
                     <li> <a href="/profileP">Profile</a> </li>
                     <li> <a href="/favouritesP">Favourites</a> </li>
                 {/if}
@@ -110,7 +98,7 @@
         <div class="row right">
             <ul>
 
-                {#if !user.email}
+                {#if !user.id}
                     <li> <a href="/loginP">Sign in</a> </li>
                     <li> <a href="/registerP" >Sign up</a> </li>
                 {:else}
@@ -119,7 +107,7 @@
 
                     <li>
                         <div class="center">
-                            <span>{user.email}<br></span>
+                            <span>{user.id}<br></span>
                             <span>{user.role}</span>
                         </div>
                     </li>
