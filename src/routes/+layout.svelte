@@ -3,73 +3,31 @@
 </script>
 
 <script lang="ts">
-    import { supabase } from '$lib/supabase';
-    import {goto} from "$app/navigation";
+    export let data: LayoutData;
+    let { user } = data;
 
-    export let data: LayoutData; // Access the load function data
-    let { user } = data; // Destructure user from data
-    user.id = null;
-
-    // Make sure to use the user after it has been set
     console.log('IN LAYOUT: ', user?.id, user?.role);
 
-    // CHECK USER
-    // async function checkUser() {
-    //     const { data: { session } } = await supabase.auth.getSession();
-    //     // console.log(session?.user);
-    //
-    //     if (session) {
-    //         const { data: profile, error } = await supabase
-    //             .from('ck_person')
-    //             .select('role, id')
-    //             .eq('id', session.user.id)
-    //             .single();
-    //
-    //         if (error) {
-    //             console.error('Error fetching user profile:', error.message);
-    //             user = { id: undefined, email: undefined, role: undefined };
-    //
-    //         } else {
-    //             user = { id: profile.id, email: session.user.email, role: profile.role };
-    //             // sessionStorage.setItem('user', JSON.stringify(user.id));
-    //             // sessionStorage.setItem('role', JSON.stringify(user.role));
-    //         }
-    //     } else {
-    //         user = { id: undefined, email: undefined, role: undefined };
-    //     }
-    // }
-
-    // SESSION CHANGE
-    // supabase.auth.onAuthStateChange((_event, session) => {
-    //     if (session) {
-    //
-    //         checkUser();
-    //     } else {
-    //         user = { id: undefined, email: undefined, role: undefined };
-    //     }
-    // });
-
-    // // CHECK ROLE
+    // CHECK ROLE
     function checkRole(): boolean {
         return user.role == 'cook' || user.role == 'superadmin';
     }
 
-    // LOGOUT
+    // LOGOUT CLIENT SIDE
+    // async function logout() {
+    //     const { error } = await supabase.auth.signOut();
+    //     if (error) {
+    //         console.error('Logout failed:', error.message);
+    //     } else {
+    //         sessionStorage.clear();
+    //         console.log('User logged out successfully');
+    //         await goto('/');
+    //     }
+    // }
+    // FOR BUTTON TO PERSIST
     async function logout() {
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-            console.error('Logout failed:', error.message);
-        } else {
-            sessionStorage.clear();
-            console.log('User logged out successfully');
-            await goto('/');
-        }
+        console.log('LOGOUT');
     }
-
-    // ON MOUNT
-    // onMount(() => {
-    //     checkUser();
-    // })
 </script>
 
 <nav>
