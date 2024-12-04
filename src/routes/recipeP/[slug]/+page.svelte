@@ -1,91 +1,43 @@
 <script lang="ts">
-    import { supabase } from '$lib/supabase';
-    import type { PageData } from './$types';
-    import { onMount } from "svelte";
-    import { goto } from "$app/navigation";
+    import { goto } from '$app/navigation';
+    import {onMount} from "svelte";
+    export let data: { recipe: any, id: any };
 
-    let { data }: { data: PageData } = $props();
-    let id = BigInt(data.recipeId);
+    let isEditing = false;
+    let recipe = data.recipe;
+    let id = data.id;
 
-    let currentUser: string | null = $state(null);
-    let currentRole: string | null = $state(null);
-
-    let recipe: {
-        user_id: string;
-        name: string;
-        author: string;
-        description: string;
-        image: string;
-        difficulty: string;
-    } | null = $state(null);
-
-    let imageUrl: string;
-    let imagePath: string;
-
-    async function loadRecipe() {
-        const { data, error } = await supabase
-            .from('ck_recipe')
-            .select('name, user_id, description, image, difficulty')
-            .eq('id', id)
-            .single();
-
-        if (error) {
-            console.error(`Error fetching recipe with ID ${id}:`, error.message);
-            return;
-        }
-
-        const authorData = await supabase.from('ck_person').select('name, surname').eq('id', data.user_id).single();
-
-        imagePath = data.image;
-        if (data.image) {
-            const { data: publicData } = supabase.storage.from('images').getPublicUrl(imagePath);
-            imageUrl = publicData.publicUrl || imageUrl;
-        }
-
-        recipe = {
-            user_id: data.user_id,
-            name: data.name,
-            author: authorData.data?.name + ' ' + authorData.data?.surname || 'Unknown',
-            description: data.description,
-            image: imageUrl,
-            difficulty: data.difficulty || 'Unknown',
-        };
+    function editRecipe() {
+        isEditing = !isEditing;
     }
 
-    async function deleteRecipe() {
-        if (!currentUser || !recipe) {
-            alert('Error with editing recipe.');
-            return;
-        }
+    let currentUser: string | null = null;
+    let currentRole: string | null = null;
 
-        const confirmDelete = window.confirm('Are you sure you want to delete this recipe? This action cannot be undone.');
+    onMount(() => {
+        currentUser = JSON.parse(sessionStorage.getItem('user') || 'null');
+        currentRole = JSON.parse(sessionStorage.getItem('role') || 'null');
+    });
+
+    async function deleteRecipe() {
+        const confirmDelete = window.confirm('Are you sure you want to delete this recipe?');
         if (!confirmDelete) {
             return;
         }
 
-        if (currentUser === recipe.user_id || currentRole === 'superadmin') {
-            const { error } = await supabase
-                .from('ck_recipe')
-                .delete()
-                .eq('id', id);
+        console.log(id);
 
-            if (error) {
-                console.error('Error deleting recipe:', error.message);
-                alert('Failed to delete the recipe.');
-                return;
-            }
+        const response = await fetch(`/recipeP/${id}?/deleteRecipe`, {
+            method: 'POST',
+            body: new URLSearchParams({ action: 'deleteRecipe' }),
+        });
 
+        if (response.ok) {
             alert('Recipe deleted successfully!');
             await goto('/');
-
         } else {
-            alert('You do not have permission to delete this recipe.');
+            alert('Failed to delete recipe. Please try again.');
         }
-    }
-
-    let isEditing = $state(false);
-    function editRecipe() {
-        isEditing = !isEditing;
     }
 
     let imageFile: File | null = null;
@@ -96,54 +48,31 @@
         }
     }
 
-    async function updateRecipe() {
-        if (!currentUser || !recipe) {
-            alert('Error with editing recipe.');
-            return;
-        }
+    async function updateRecipe(event: Event) {
+        event.preventDefault();
 
-        const confirmUpdate = window.confirm('Are you sure you want to save changes to this recipe?');
-        if (!confirmUpdate) {
-            return;
-        }
+        const formData = new FormData(event.target as HTMLFormElement);
 
-        if (imageFile) {
-            const { data, error } = await supabase.storage
-                .from('images')
-                .upload(`public/${Date.now()}_${imageFile.name}`, imageFile);
+        try {
+            const response = await fetch(`/recipeP/${id}?/updateRecipe`, {
+                method: 'POST',
+                body: formData,
+            });
 
-            if (error) {
-                console.error('Error uploading image:', error.message);
-                alert('Failed to upload the new image.');
-                return;
+            if (!response.ok) {
+                const error = await response.json();
+                alert(`Failed to update the recipe: ${error.message}`);
+            } else {
+                alert('Recipe updated successfully!');
+                isEditing = false;
+                location.reload();
             }
-
-            imagePath = data?.path;
+        } catch (error) {
+            console.error('Error updating recipe:', error);
+            alert('An unexpected error occurred.');
         }
-
-        const { error } = await supabase.from('ck_recipe').update({
-            name: recipe.name,
-            difficulty: recipe.difficulty,
-            description: recipe.description,
-            image: imagePath,
-        }).eq('id', id);
-
-        if (error) {
-            console.error('Error with updating recipe:', error.message);
-            alert('Failed to update the recipe.');
-            return;
-        }
-
-        alert('Recipe updated successfully!');
-        isEditing = false;
-        await loadRecipe();
     }
 
-    onMount(() => {
-        currentUser = JSON.parse(sessionStorage.getItem('user') || 'null');
-        currentRole = JSON.parse(sessionStorage.getItem('role') || 'null');
-        loadRecipe();
-    });
 </script>
 
 {#if !isEditing}
@@ -174,7 +103,7 @@
                 <p></p>
             </div>
 
-            {#if currentUser && (currentUser === recipe.user_id || currentRole === 'superadmin')}
+            {#if currentUser === recipe.user_id || currentRole === 'superadmin'}
                 <div class="buttons">
                     <div class="delete-button">
                         <button type="button" onclick={deleteRecipe}>DELETE</button>
@@ -200,12 +129,22 @@
             <form onsubmit={updateRecipe}>
 
                 <div class="recipe-header">
-
                     <label for="name">Recipe Name</label>
-                    <input id="name" type="text" bind:value={recipe.name} required />
-                    <label for="difficulty">Difficulty:</label>
 
-                    <select id="difficulty" bind:value={recipe.difficulty}>
+                    <input
+                        id="name"
+                        type="text"
+                        name="name"
+                        bind:value={recipe.name}
+                        placeholder="Enter recipe name"
+                        required />
+
+                    <label for="difficulty">Difficulty:</label>
+                    <select
+                        id="difficulty"
+                        name="difficulty"
+                        bind:value={recipe.difficulty}>
+
                         <option value="Easy">Easy</option>
                         <option value="Medium">Medium</option>
                         <option value="Hard">Hard</option>
@@ -214,24 +153,43 @@
 
                     <div class="image-input-wrapper">
                         <label for="image">Recipe Image</label>
-                        <input id="image" type="file" accept="image/*" onchange={handleFileInput} />
+                        <input
+                            id="image"
+                            type="file"
+                            name="image"
+                            accept="image/*"
+                            onchange={handleFileInput}
+                        />
                     </div>
-
                 </div>
 
                 <div class="recipe-description">
                     <label for="description">Recipe Description</label>
-                    <textarea id="description" bind:value={recipe.description} required></textarea>
+
+                    <textarea
+                        id="description"
+                        name="description"
+                        bind:value={recipe.description}
+                        placeholder="Enter recipe description"
+                        required>
+                    </textarea>
                 </div>
 
                 <div class="buttons">
 
                     <div class="delete-button">
-                        <button type="button" onclick={editRecipe}>CANCEL</button>
+                        <button
+                            type="button"
+                            onclick={editRecipe}
+                            class="btn-cancel">
+                            CANCEL
+                        </button>
                     </div>
 
                     <div class="edit-button">
-                        <button type="submit">SAVE</button>
+                        <button type="submit" class="btn-save">
+                            SAVE
+                        </button>
                     </div>
 
                 </div>
@@ -243,6 +201,7 @@
     </div>
 
 {/if}
+
 
 
 <style>

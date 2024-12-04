@@ -33,6 +33,7 @@
     // SESSION CHANGE
     supabase.auth.onAuthStateChange((_event, session) => {
         if (session) {
+
             checkUser();
         } else {
             user = { id: undefined, email: undefined, role: undefined };

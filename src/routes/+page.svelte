@@ -1,33 +1,11 @@
 <script lang="ts">
     import RecipeCard from "../components/RecipeCard.svelte";
-    import { supabase } from '$lib/supabase';
-
-    interface Recipe {
-        id: bigint;
-    }
-
-    let recipes: Recipe[] = [];
-
-    // LOAD RECIPES
-    async function loadRecipes() {
-        const { data, error } = await supabase.from('ck_recipe').select('id');
-
-        if (error) {
-            console.error('Error fetching recipes:', error.message);
-            recipes = [];
-        } else {
-            recipes = data.map((recipe) => ({
-                id: BigInt(recipe.id),
-            }));
-        }
-    }
-
-    loadRecipes();
+    export let data: { recipes: { id: bigint }[] };
 </script>
 
 <div class="page-content">
 
-    {#each recipes as recipe}
+    {#each data.recipes as recipe}
         <RecipeCard id={recipe.id} />
     {/each}
 

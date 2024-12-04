@@ -7,6 +7,7 @@ import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/publi
 export const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
     auth: {
         persistSession: true,
+        detectSessionInUrl: true,
         autoRefreshToken: true
     },
     global: {

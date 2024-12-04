@@ -67,7 +67,7 @@
 
         <div class="recipe-input-group">
             <label for="image">Recipe Image</label>
-            <input id="image" type="file" accept="image/*" on:change={handleFileInput} />
+            <input id="image" type="file" accept="image/*" on:change={handleFileInput} required/>
         </div>
 
         <div class="recipe-input-group">

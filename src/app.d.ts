@@ -5,7 +5,10 @@ import {SupabaseClient, Session}	 from "@supabase/supabase-js";
 declare global {
 	namespace App {
 		// interface Error {}
-		// interface Locals {}
+		interface Locals {
+			currentUser: string;
+			currentRole: string;
+		}
 		 interface PageData {
 			 supabase: SupabaseClient
 			 session: Session | null
