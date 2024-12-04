@@ -27,6 +27,7 @@
     // FOR BUTTON TO PERSIST
     async function logout() {
         console.log('LOGOUT');
+
     }
 </script>
 
@@ -60,8 +61,9 @@
                     <li> <a href="/loginP">Sign in</a> </li>
                     <li> <a href="/registerP" >Sign up</a> </li>
                 {:else}
-
-                    <li> <button onclick={logout} >Logout</button> </li>
+                    <form method="POST" action="/loginP?/logout">
+                        <button type="submit" >Logout</button>
+                    </form>
 
                     <li>
                         <div class="center">

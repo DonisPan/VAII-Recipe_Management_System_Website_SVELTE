@@ -46,4 +46,11 @@ export const actions: Actions = {
             return fail(500, { error: 'Unexpected error occurred during login.' });
         }
     },
+
+    logout: async ({ locals }) => {
+        await supabase.auth.signOut();
+        locals.currentUser = null;
+        locals.currentRole = null;
+        locals.currentName = null;
+    }
 };
