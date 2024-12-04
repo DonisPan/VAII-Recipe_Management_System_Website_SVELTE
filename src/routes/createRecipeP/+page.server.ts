@@ -3,7 +3,6 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { z } from 'zod';
 
-// Define validation schema for recipe creation
 const recipeSchema = z.object({
     name: z.string().min(1, 'Recipe name is required.'),
     description: z.string().min(1, 'Description is required.'),
@@ -12,10 +11,10 @@ const recipeSchema = z.object({
 });
 
 export const actions: Actions = {
+    // CREATE RECIPE
     createRecipe: async ({ request, locals }) => {
         const formData = await request.formData();
 
-        // Extract and validate form data
         const name = formData.get('name') as string;
         const description = formData.get('description') as string;
         const difficulty = formData.get('difficulty') as string;
@@ -31,7 +30,7 @@ export const actions: Actions = {
 
         let imagePath = null;
 
-        // Handle image upload if a file is provided
+        // IF IMAGE
         if (imageFile) {
             const { data, error } = await supabase.storage
                 .from('images')
@@ -44,7 +43,7 @@ export const actions: Actions = {
             imagePath = data?.path;
         }
 
-        // Insert the recipe into the database
+        // INSERT RECIPE
         let currentUser = locals.currentUser;
         const { error } = await supabase.from('ck_recipe').insert({
             name,

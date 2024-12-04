@@ -9,6 +9,7 @@ const loginSchema = z.object({
 });
 
 export const actions: Actions = {
+    // LOGIN
     login: async ({ request, cookies }) => {
         const formData = await request.formData();
         const email = formData.get('email') as string;
@@ -31,12 +32,13 @@ export const actions: Actions = {
             return fail(401, { error: 'Invalid email or password.' });
         }
 
+        // SET COOKIE FOR SESSION
         if (session) {
             cookies.set('sb-access-token', session.session?.access_token || '', {
                 httpOnly: true,
                 secure: true,
                 sameSite: 'strict',
-                maxAge: 60 * 60 * 24 * 7, // 7 days
+                maxAge: 60 * 60 * 24 * 7, // 7 DAYS
                 path: '/',
             });
             throw redirect(302, '/');

@@ -41,12 +41,15 @@ export const load: PageServerLoad = async ({params, locals}) => {
         image: imageUrl,
         difficulty: recipeData.difficulty || 'Unknown',
     };
+
     let currentUser = locals.currentUser;
     let currentRole = locals.currentRole;
+
     return { recipe, id, currentUser, currentRole };
 };
 
 export const actions: Actions = {
+    // DELETE RECIPE
     deleteRecipe: async ({ params }) => {
         const id = BigInt(params.slug);
 
@@ -75,6 +78,7 @@ export const actions: Actions = {
         return true;
     },
 
+    // UPDATE RECIPE
     updateRecipe: async ({ params, request }) => {
         const id = BigInt(params.slug);
 
@@ -87,10 +91,7 @@ export const actions: Actions = {
         const {data: imageData }= await supabase.from('ck_recipe').select('image').eq('id', id).single()
         let imagePath = imageData?.image;
 
-        // Log received data for debugging
-        console.log(imageFile);
-
-        // If a new image is uploaded, handle file upload
+        // IF NEW IMAGE
         if (imageFile && imageFile.size > 0) {
             const { data, error } = await supabase.storage
                 .from('images')
@@ -100,11 +101,11 @@ export const actions: Actions = {
                 console.error('Image upload failed:', error.message);
                 return { error: 'Image upload failed' };
             }
-            console.log('Upload path:', data.path);
-            imagePath = data.path; // Update imagePath to the new image path
+
+            imagePath = data.path;
         }
 
-        // Update recipe in Supabase
+        // UPDATE RECIPE
         const { error } = await supabase.from('ck_recipe').update({
             name,
             difficulty,

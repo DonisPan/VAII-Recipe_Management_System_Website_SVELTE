@@ -3,7 +3,6 @@ import {fail, redirect} from '@sveltejs/kit';
 import { z } from 'zod';
 import type { Actions } from './$types';
 
-// Define schema for validation
 const signUpSchema = z.object({
     name: z.string().min(1, 'Name is required.'),
     surname: z.string().min(1, 'Surname is required.'),
@@ -29,7 +28,7 @@ export const actions: Actions = {
             });
         }
 
-        // Attempt to sign up the user
+        // SIGN UP
         const { data: userData, error: authError } = await supabase.auth.signUp({
             email,
             password,
@@ -39,8 +38,8 @@ export const actions: Actions = {
             return fail(400, { error: `Sign up failed: ${authError.message}` });
         }
 
+        // ADD ADDITIONAL INFORMATION TO TABLE CK_RECIPE
         if (userData.user) {
-            // Save additional user data in the database
             const { error: profileError } = await supabase
                 .from('ck_person')
                 .insert({
@@ -54,12 +53,12 @@ export const actions: Actions = {
                 return fail(500, { error: `Failed to save profile: ${profileError.message}` });
             }
 
-            // Set cookie for session management
+            // SET COOKIE FOR SESSION
             cookies.set('sb-access-token', userData.session?.access_token || '', {
                 httpOnly: true,
                 secure: true,
                 sameSite: 'strict',
-                maxAge: 60 * 60 * 24 * 7, // 7 days
+                maxAge: 60 * 60 * 24 * 7, // 7 DAYS
                 path: '/',
             });
 

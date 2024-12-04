@@ -1,6 +1,5 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
-    import {onMount} from "svelte";
     export let data: { recipe: any, id: any, currentUser: any, currentRole: any };
     const currentUser = data.currentUser;
     const currentRole = data.currentRole;
@@ -13,21 +12,12 @@
         isEditing = !isEditing;
     }
 
-    // let currentUser: string | null = null;
-    // let currentRole: string | null = null;
-
-    onMount(() => {
-        // currentUser = JSON.parse(sessionStorage.getItem('user') || 'null');
-        // currentRole = JSON.parse(sessionStorage.getItem('role') || 'null');
-    });
-
+    // DELETE RECIPE
     async function deleteRecipe() {
         const confirmDelete = window.confirm('Are you sure you want to delete this recipe?');
         if (!confirmDelete) {
             return;
         }
-
-        console.log(id);
 
         const response = await fetch(`/recipeP/${id}?/deleteRecipe`, {
             method: 'POST',
@@ -64,11 +54,13 @@
             if (!response.ok) {
                 const error = await response.json();
                 alert(`Failed to update the recipe: ${error.message}`);
+
             } else {
                 alert('Recipe updated successfully!');
                 isEditing = false;
                 location.reload();
             }
+
         } catch (error) {
             console.error('Error updating recipe:', error);
             alert('An unexpected error occurred.');
