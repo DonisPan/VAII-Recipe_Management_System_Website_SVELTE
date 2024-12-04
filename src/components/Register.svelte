@@ -1,10 +1,61 @@
 <script lang="ts">
+    import { z } from 'zod';
+    import {goto} from "$app/navigation";
+
     export let error: string | null = null;
     export let success: boolean = false;
+
+    let name = '';
+    let surname = '';
+    let email = '';
+    let password = '';
+    let gender = '';
+
+    const signUpSchema = z.object({
+        name: z.string().min(1, 'Name is required.'),
+        surname: z.string().min(1, 'Surname is required.'),
+        email: z.string().email('Invalid email address.'),
+        password: z.string().min(6, 'Password must be at least 6 characters long.'),
+        gender: z.enum(['Male', 'Female', 'Other'], { invalid_type_error: 'Gender is required.' }),
+    });
+
+    async function handleSignUp(event: SubmitEvent) {
+        event.preventDefault();
+
+        const validationResult = signUpSchema.safeParse({ name, surname, email, password, gender });
+        if (!validationResult.success) {
+            error = validationResult.error.errors.map(err => err.message).join(', ');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('surname', surname);
+        formData.append('email', email);
+        formData.append('password', password);
+        formData.append('gender', gender);
+
+        const response = await fetch('?/signUp', {
+            method: 'POST',
+            body: formData,
+        });
+
+        const result = await response.json();
+        console.log('Server Response:', result);
+
+        if (!response.ok) {
+            error = result.error || 'Unexpected error occurred.';
+        } else {
+            success = true;
+            await goto('/loginP');
+        }
+    }
 </script>
 
 <div class="register_container">
-    <form method="POST" action="?/signUp">
+
+    <form on:submit={handleSignUp}>
+
         <div class="register_container_box">
             <h1>Register</h1>
             {#if error}
@@ -17,18 +68,18 @@
 
         <div class="register_container_box register_container_box2">
             <label for="name">Name:</label>
-            <input type="text" id="name" name="name" placeholder="Enter your first name" required>
+            <input type="text" id="name" bind:value={name} placeholder="Enter your first name" required>
         </div>
 
         <div class="register_container_box register_container_box2">
             <label for="surname">Surname:</label>
-            <input type="text" id="surname" name="surname" placeholder="Enter your last name" required>
+            <input type="text" id="surname" bind:value={surname} placeholder="Enter your last name" required>
         </div>
 
         <div class="register_container_box register_container_box2">
             <label for="gender">Gender:</label>
-            <select id="gender" name="gender" required>
-                <option value="" disabled selected>Select gender</option>
+            <select id="gender" bind:value={gender} required>
+                <option value="" disabled>Select gender</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
                 <option value="Other">Other</option>
@@ -37,20 +88,23 @@
 
         <div class="register_container_box register_container_box2">
             <label for="email">E-mail:</label>
-            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            <input type="email" id="email" bind:value={email} placeholder="Enter your email" required>
         </div>
 
         <div class="register_container_box register_container_box2">
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            <input type="password" id="password" bind:value={password} placeholder="Enter your password" required>
         </div>
 
         <div class="register_container_box register_container_box3">
             <button type="reset" class="btn-secondary">Cancel</button>
             <button type="submit" class="btn-primary">Sign up</button>
         </div>
+
     </form>
+
 </div>
+
 
 
 <style>
@@ -58,7 +112,6 @@
         width: 400px;
         display: grid;
         grid-template-rows: auto auto auto auto auto auto auto;
-        gap: 15px;
         transform: translateY(-80px);
         border: 4px solid #49306B;
         border-radius: 15px;
@@ -77,6 +130,7 @@
     }
 
     .register_container_box2 {
+        margin-top: 10px;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -114,7 +168,6 @@
 
     .register_container_box2 select {
         appearance: none;
-        background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='%23999999' d='M2 0L0 2h4z'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
         background-position: right 10px center;
         background-size: 8px 10px;

@@ -1,5 +1,5 @@
 import { supabase } from '$lib/supabase';
-import {fail, redirect} from '@sveltejs/kit';
+import {fail} from '@sveltejs/kit';
 import { z } from 'zod';
 import type { Actions } from './$types';
 
@@ -19,7 +19,7 @@ export const actions: Actions = {
 
         if (!validationResult.success) {
             return fail(400, {
-                error: validationResult.error.errors.map(err => err.message).join(', '),
+                error: validationResult.error.errors.map((err) => err.message).join(', '),
             });
         }
 
@@ -32,19 +32,16 @@ export const actions: Actions = {
             return fail(401, { error: 'Invalid email or password.' });
         }
 
-        // SET COOKIE FOR SESSION
-        if (session) {
-            cookies.set('sb-access-token', session.session?.access_token || '', {
-                httpOnly: true,
-                secure: true,
-                sameSite: 'strict',
-                maxAge: 60 * 60 * 24 * 7, // 7 DAYS
-                path: '/',
-            });
-            throw redirect(302, '/');
-        } else {
-            return fail(500, { error: 'Unexpected error occurred during login.' });
-        }
+        // COOKIE
+        cookies.set('sb-access-token', session.session?.access_token || '', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'strict',
+            maxAge: 60 * 60 * 24 * 7, // 7 DAYS
+            path: '/',
+        });
+
+        return { success: true };
     },
 
     logout: async ({ locals }) => {

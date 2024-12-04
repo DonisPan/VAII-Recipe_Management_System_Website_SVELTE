@@ -3,9 +3,6 @@ import type { Handle } from '@sveltejs/kit';
 import cookie from 'cookie';
 
 export const handle: Handle = async ({ event, resolve }) => {
-    // console.log('HANDLE: Initializing');
-
-    // Parse cookies from the request
     const cookies = cookie.parse(event.request.headers.get('cookie') || '');
     const accessToken = cookies['sb-access-token'];
     // console.log('Access Token:', accessToken);

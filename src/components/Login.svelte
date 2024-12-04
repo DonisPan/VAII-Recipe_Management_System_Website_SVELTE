@@ -1,25 +1,70 @@
 <script lang="ts">
-    export let error: { error: string } | null = null;
+    import { z } from 'zod';
+    import {goto} from "$app/navigation";
+
+    const loginSchema = z.object({
+        email: z.string().email('Please enter a valid email address.'),
+        password: z.string().min(6, 'Password must be at least 6 characters long.'),
+    });
+
+    export let error: string | null = null;
+
+    let email = '';
+    let password = '';
+    let clientError: string | null = null;
+
+    async function handleLogin(event: SubmitEvent) {
+        event.preventDefault();
+
+        const validationResult = loginSchema.safeParse({ email, password });
+        if (!validationResult.success) {
+            clientError = validationResult.error.errors.map(err => err.message).join(', ');
+            return;
+        }
+
+        clientError = null;
+
+        const formData = new FormData();
+        formData.append('email', email);
+        formData.append('password', password);
+
+        const response = await fetch('?/login', {
+            method: 'POST',
+            body: formData,
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+            clientError = result.error || 'Unexpected error occurred.';
+        } else {
+            await goto('/');
+            location.reload();
+        }
+    }
 </script>
 
 <div class="page-container">
     <div class="login_container">
         <div class="login_container_box">
             <h1>Login</h1>
-            {#if error?.error}
-                <p class="error-message">{error.error}</p>
+            {#if clientError}
+                <p class="error-message">{clientError}</p>
+            {/if}
+
+            {#if error}
+                <p class="error-message">{error}</p>
             {/if}
         </div>
 
-        <form method="POST" action="?/login">
+        <form on:submit={handleLogin}>
             <div class="login_container_box login_container_box2">
                 <label for="email">E-mail:</label>
-                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                <input type="email" id="email" bind:value={email} placeholder="Enter your email" required>
             </div>
 
             <div class="login_container_box login_container_box2">
                 <label for="password">Password:</label>
-                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                <input type="password" id="password" bind:value={password} placeholder="Enter your password" required>
             </div>
 
             <div class="login_container_box login_container_box3">
@@ -31,12 +76,12 @@
 </div>
 
 
+
 <style>
     .login_container {
         width: 400px;
         display: grid;
         grid-template-rows: auto auto auto auto;
-        gap: 15px;
         transform: translateY(-80px);
         border: 4px solid #49306B;
         border-radius: 15px;
@@ -55,6 +100,7 @@
     }
 
     .login_container_box2 {
+        margin-top: 20px;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -89,9 +135,11 @@
         justify-content: space-between;
         align-items: center;
         margin-top: 10px;
+        margin-bottom: 0;
     }
 
     button {
+        all: unset;
         font-family: "Trebuchet MS", Helvetica, sans-serif;
         font-size: 14px;
         font-weight: bold;

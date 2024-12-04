@@ -1,5 +1,5 @@
 import { supabase } from '$lib/supabase';
-import {fail, redirect} from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import { z } from 'zod';
 import type { Actions } from './$types';
 
@@ -12,8 +12,9 @@ const signUpSchema = z.object({
 });
 
 export const actions: Actions = {
-    signUp: async ({ request, cookies }) => {
+    signUp: async ({ request }) => {
         const formData = await request.formData();
+
         const name = formData.get('name') as string;
         const surname = formData.get('surname') as string;
         const email = formData.get('email') as string;
@@ -21,14 +22,12 @@ export const actions: Actions = {
         const gender = formData.get('gender') as string;
 
         const validationResult = signUpSchema.safeParse({ name, surname, email, password, gender });
-
         if (!validationResult.success) {
             return fail(400, {
                 error: validationResult.error.errors.map(err => err.message).join(', '),
             });
         }
 
-        // SIGN UP
         const { data: userData, error: authError } = await supabase.auth.signUp({
             email,
             password,
@@ -38,7 +37,6 @@ export const actions: Actions = {
             return fail(400, { error: `Sign up failed: ${authError.message}` });
         }
 
-        // ADD ADDITIONAL INFORMATION TO TABLE CK_RECIPE
         if (userData.user) {
             const { error: profileError } = await supabase
                 .from('ck_person')
@@ -53,18 +51,9 @@ export const actions: Actions = {
                 return fail(500, { error: `Failed to save profile: ${profileError.message}` });
             }
 
-            // SET COOKIE FOR SESSION
-            cookies.set('sb-access-token', userData.session?.access_token || '', {
-                httpOnly: true,
-                secure: true,
-                sameSite: 'strict',
-                maxAge: 60 * 60 * 24 * 7, // 7 DAYS
-                path: '/',
-            });
-
             throw redirect(302, '/');
-        } else {
-            return fail(500, { error: 'Unexpected error occurred during sign up.' });
         }
+
+        return fail(500, { error: 'Unexpected error occurred during sign up.' });
     },
 };

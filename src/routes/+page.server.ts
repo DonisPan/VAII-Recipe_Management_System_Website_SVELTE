@@ -12,7 +12,6 @@ export const load: PageServerLoad = async (): Promise<any> => {
             };
         }
 
-
         const urls = data.map((recipe) => {
             const { data } = supabase.storage.from('images').getPublicUrl(recipe.image);
             return { id: recipe.id, image: data.publicUrl };
