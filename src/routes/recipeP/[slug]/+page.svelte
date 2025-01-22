@@ -12,6 +12,13 @@
         isEditing = !isEditing;
     }
 
+    // FAVOURITE RECIPE
+    let isFavorite = false;
+    function toggleFavorite() {
+        isFavorite = !isFavorite;
+        // Here you can add logic to save to database
+    }
+
     // DELETE RECIPE
     async function deleteRecipe() {
         const confirmDelete = window.confirm('Are you sure you want to delete this recipe?');
@@ -77,6 +84,21 @@
 
             <div class="recipe-header">
                 <h1>{recipe.name}</h1>
+<!--                show favourites button only if some user is logged in-->
+                {#if currentRole !== null}
+                <button class="favorite-btn"
+                        onclick={toggleFavorite}
+                        aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                >
+                    <svg class={isFavorite ? 'active' : ''}
+                         viewBox="0 0 24 24"
+                         xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                </button>
+                {/if}
+
                 <h3>Author: {recipe.author}</h3>
                 <h3>Difficulty: {recipe.difficulty}</h3>
                 <img src={recipe.image} alt="recipe_image" />
@@ -97,6 +119,7 @@
                 <p></p>
             </div>
 
+<!--            show the delete and update recipe buttons only if the user is the creator of the recipe or is superadmin-->
             {#if currentUser === recipe.user_id || currentRole === 'superadmin'}
                 <div class="buttons">
                     <div class="delete-button">
@@ -210,6 +233,7 @@
     }
 
     .recipe-header {
+        position: relative;
         text-align: center;
         margin-bottom: 2rem;
     }
@@ -461,6 +485,35 @@
         box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     }
 
+    .favorite-btn {
+        position: absolute;
+        right: 2rem;
+        top: 2rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 8px;
+        transition: transform 0.2s ease;
+    }
+
+    .favorite-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .favorite-btn svg {
+        width: 32px;
+        height: 32px;
+        fill: none;
+        stroke: var(--tekhelet);
+        stroke-width: 2;
+        transition: fill 0.3s ease, stroke 0.3s ease;
+    }
+
+    .favorite-btn svg.active {
+        fill: #FFD700;
+        stroke: #FFD700;
+    }
+
     @media (max-width: 768px) {
         .recipe-page {
             padding: 1.5rem;
@@ -469,17 +522,15 @@
         .recipe-header img {
             max-height: 250px;
         }
-    }
 
-
-    @media (max-width: 768px) {
-        .recipe-page {
-            padding: 1.5rem;
+        .favorite-btn {
+            right: 1rem;
+            top: 1rem;
         }
 
-        .recipe-header img {
-            max-height: 250px;
+        .favorite-btn svg {
+            width: 28px;
+            height: 28px;
         }
     }
-
 </style>
