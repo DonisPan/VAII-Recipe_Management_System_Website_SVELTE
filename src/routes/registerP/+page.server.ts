@@ -12,7 +12,7 @@ const signUpSchema = z.object({
 });
 
 export const actions: Actions = {
-    signUp: async ({ request }) => {
+    register: async ({ request }) => {
         const formData = await request.formData();
 
         const name = formData.get('name') as string;
