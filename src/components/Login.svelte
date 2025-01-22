@@ -28,17 +28,23 @@
         formData.append('email', email);
         formData.append('password', password);
 
-        const response = await fetch('?/login', {
-            method: 'POST',
-            body: formData,
-        });
+        try {
+            const response = await fetch('?/login', {
+                method: 'POST',
+                body: formData,
+            });
 
-        const result = await response.json();
-        if (!response.ok) {
-            clientError = result.error || 'Unexpected error occurred.';
-        } else {
+            const result = await response.json();
+
+            if (!response.ok) {
+                clientError = 'Wrong user login information';
+                return;
+            }
+
             await goto('/');
             location.reload();
+        } catch (err) {
+            clientError = 'An unexpected error occurred';
         }
     }
 </script>
@@ -75,8 +81,6 @@
     </div>
 </div>
 
-
-
 <style>
     .login_container {
         width: 400px;
@@ -97,6 +101,17 @@
         font-size: 30px;
         text-align: center;
         color: #49306B;
+    }
+
+    .error-message {
+        color: #dc2626;
+        font-size: 14px;
+        text-align: center;
+        margin: 10px 0;
+        padding: 8px;
+        background-color: #fef2f2;
+        border: 1px solid #fee2e2;
+        border-radius: 8px;
     }
 
     .login_container_box2 {

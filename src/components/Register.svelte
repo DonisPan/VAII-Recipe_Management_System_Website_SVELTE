@@ -10,6 +10,7 @@
     let email = '';
     let password = '';
     let gender = '';
+    let clientError: string | null = null;
 
     const signUpSchema = z.object({
         name: z.string().min(1, 'Name is required.'),
@@ -24,9 +25,11 @@
 
         const validationResult = signUpSchema.safeParse({ name, surname, email, password, gender });
         if (!validationResult.success) {
-            error = validationResult.error.errors.map(err => err.message).join(', ');
+            clientError = validationResult.error.errors.map(err => err.message).join(', ');
             return;
         }
+
+        clientError = null;
 
         const formData = new FormData();
         formData.append('name', name);
@@ -35,29 +38,34 @@
         formData.append('password', password);
         formData.append('gender', gender);
 
-        const response = await fetch('?/signUp', {
-            method: 'POST',
-            body: formData,
-        });
+        try {
+            const response = await fetch('?/register', {
+                method: 'POST',
+                body: formData,
+            });
 
-        const result = await response.json();
-        console.log('Server Response:', result);
+            const result = await response.json();
 
-        if (!response.ok) {
-            error = result.error || 'Unexpected error occurred.';
-        } else {
+            if (!response.ok) {
+                clientError = 'Registration failed. Email might already be in use.';
+                return;
+            }
+
             success = true;
             await goto('/loginP');
+        } catch (err) {
+            clientError = 'An unexpected error occurred';
         }
     }
 </script>
 
 <div class="register_container">
-
     <form on:submit={handleSignUp}>
-
         <div class="register_container_box">
             <h1>Register</h1>
+            {#if clientError}
+                <p class="error-message">{clientError}</p>
+            {/if}
             {#if error}
                 <p class="error-message">{error}</p>
             {/if}
@@ -100,12 +108,8 @@
             <button type="reset" class="btn-secondary">Cancel</button>
             <button type="submit" class="btn-primary">Sign up</button>
         </div>
-
     </form>
-
 </div>
-
-
 
 <style>
     .register_container {
@@ -127,6 +131,28 @@
         font-size: 30px;
         text-align: center;
         color: #49306B;
+    }
+
+    .error-message {
+        color: #dc2626;
+        font-size: 14px;
+        text-align: center;
+        margin: 10px 0;
+        padding: 8px;
+        background-color: #fef2f2;
+        border: 1px solid #fee2e2;
+        border-radius: 8px;
+    }
+
+    .success-message {
+        color: #059669;
+        font-size: 14px;
+        text-align: center;
+        margin: 10px 0;
+        padding: 8px;
+        background-color: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        border-radius: 8px;
     }
 
     .register_container_box2 {
