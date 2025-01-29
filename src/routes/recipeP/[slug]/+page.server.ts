@@ -4,6 +4,11 @@ import type {PageServerLoad, Actions} from './$types';
 export const load: PageServerLoad = async ({params, locals}): Promise<any> => {
     const id = BigInt(params.slug);
 
+    //LOAD LOCALS
+    let currentUser = locals.currentUser;
+    let currentRole = locals.currentRole;
+
+    //LOAD RECIPE
     const { data: recipeData, error: recipeError } = await supabase
         .from('ck_recipe')
         .select('name, user_id, description, image, difficulty')
@@ -15,6 +20,7 @@ export const load: PageServerLoad = async ({params, locals}): Promise<any> => {
         return { recipe: null };
     }
 
+    //LOAD RECIPE OWNER
     const { data: authorData, error: authorError } = await supabase
         .from('ck_person')
         .select('name, surname')
@@ -25,6 +31,7 @@ export const load: PageServerLoad = async ({params, locals}): Promise<any> => {
         console.error('Error fetching author data:', authorError.message);
     }
 
+    //LOAD RECIPE IMAGE
     const imagePath = recipeData.image;
     let imageUrl = '';
 
@@ -33,6 +40,7 @@ export const load: PageServerLoad = async ({params, locals}): Promise<any> => {
         imageUrl = publicData.publicUrl || '';
     }
 
+    //CREATE RECIPE FOR CLIENT
     const recipe = {
         user_id: recipeData.user_id,
         name: recipeData.name,
@@ -42,10 +50,20 @@ export const load: PageServerLoad = async ({params, locals}): Promise<any> => {
         difficulty: recipeData.difficulty || 'Unknown',
     };
 
-    let currentUser = locals.currentUser;
-    let currentRole = locals.currentRole;
+    //CHECK IF IS FAVOURITE
+    const { data: favouriteData, error: favouriteError } = await supabase
+        .from('ck_user_favourites')
+        .select('recipe_id')
+        .eq('recipe_id', id)
+        .eq('user_id', currentUser)
+        .single();
 
-    return { recipe, id, currentUser, currentRole };
+    if (favouriteError) {
+        console.error('Error fetching favourite data:', favouriteError.message);
+    }
+    let isFavourite = !!favouriteData;
+
+    return { recipe, id, currentUser, currentRole, isFavourite };
 };
 
 export const actions: Actions = {
@@ -61,7 +79,7 @@ export const actions: Actions = {
             .eq('id', id)
             .single();
 
-        console.log(recipeData);
+        //console.log(recipeData);
 
         if (fetchError || !recipeData) {
             return { error: 'Recipe not found' };
@@ -120,5 +138,71 @@ export const actions: Actions = {
 
         return { success: true };
     },
+
+    favouriteRecipe: async ({ params, locals }) => {
+        console.log(`Received request for favouriteRecipe with recipe ID: ${params.slug}`);
+
+        const id = BigInt(params.slug);
+        const currentUser = locals.currentUser;
+
+        console.log('User ID:', currentUser ? currentUser : 'No user');
+
+        if (!currentUser) {
+            console.error('Unauthorized: User not logged in.');
+            return { status: 401, body: { error: 'Unauthorized' } };
+        }
+
+        try {
+            const { error } = await supabase
+                .from('ck_user_favourites')
+                .insert({ user_id: currentUser, recipe_id: id.toString() });
+
+            if (error) {
+                console.error('Database Error - Adding favorite:', error.message);
+                return { status: 500, body: { error: 'Failed to add favorite' } };
+            }
+
+            console.log(`Successfully added recipe ${id} to favorites for user ${currentUser}`);
+            return { status: 200, body: { success: true } };
+        } catch (error) {
+            console.error('Unexpected error in favouriteRecipe:', error);
+            return { status: 500, body: { error: 'Internal server error' } };
+        }
+    },
+
+
+    unFavouriteRecipe: async ({ params, locals }) => {
+        console.log(`Received request for unFavouriteRecipe with recipe ID: ${params.slug}`);
+
+        const id = BigInt(params.slug);
+        const currentUser = locals.currentUser;
+
+        console.log('User ID:', currentUser ? currentUser : 'No user');
+
+        if (!currentUser) {
+            console.error('Unauthorized: User not logged in.');
+            return { status: 401, body: { error: 'Unauthorized' } };
+        }
+
+        try {
+            const { error } = await supabase
+                .from('ck_user_favourites')
+                .delete()
+                .eq('user_id', currentUser)
+                .eq('recipe_id', id.toString());
+
+            if (error) {
+                console.error('Database Error - Removing favorite:', error.message);
+                return { status: 500, body: { error: 'Failed to remove favorite' } };
+            }
+
+            console.log(`Successfully removed recipe ${id} from favorites for user ${currentUser}`);
+            return { status: 200, body: { success: true } };
+        } catch (error) {
+            console.error('Unexpected error in unFavouriteRecipe:', error);
+            return { status: 500, body: { error: 'Internal server error' } };
+        }
+    },
+
 
 };

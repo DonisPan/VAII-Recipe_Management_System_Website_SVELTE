@@ -1,6 +1,6 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
-    export let data: { recipe: any, id: any, currentUser: any, currentRole: any };
+    export let data: { recipe: any, id: any, currentUser: any, currentRole: any, isFavourite: boolean };
     const currentUser = data.currentUser;
     const currentRole = data.currentRole;
 
@@ -12,11 +12,30 @@
         isEditing = !isEditing;
     }
 
-    // FAVOURITE RECIPE
-    let isFavorite = false;
-    function toggleFavorite() {
-        isFavorite = !isFavorite;
-        // Here you can add logic to save to database
+    // FAVOURITE/UNFAVOURITE RECIPE
+    let isFavorite = data.isFavourite;
+    async function toggleFavorite() {
+        if (isFavorite) {
+            console.log('unFavorite clicked');
+            const response = await fetch(`/recipeP/${id}?/unFavouriteRecipe`, {
+                method: 'POST',
+                body: new URLSearchParams({ action: 'unFavouriteRecipe' }),
+            });
+            if (response.ok) {
+                console.log(response);
+                isFavorite = false;
+            }
+        } else {
+            console.log('Favorite clicked');
+            const response = await fetch(`/recipeP/${id}?/favouriteRecipe`, {
+                method: 'POST',
+                body: new URLSearchParams({ action: 'favouriteRecipe' }),
+            });
+            if (response.ok) {
+                console.log(response);
+                isFavorite = true;
+            }
+        }
     }
 
     // DELETE RECIPE
