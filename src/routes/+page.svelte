@@ -1,11 +1,16 @@
 <script lang="ts">
     import RecipeCard from "../components/RecipeCard.svelte";
+    import {onMount} from "svelte";
     export let data: { recipes: { id: bigint, name: string, image: string, difficulty: string }[] };
 
     let isVisible = false;
 
-    window.addEventListener('scroll', () => {
-        isVisible = window.scrollY > 300;
+    onMount(() => {
+        const handleScroll = () => {
+            isVisible = window.scrollY > 300;
+        };
+
+        window.addEventListener('scroll', handleScroll);
     });
 
     function scrollToTop() {
