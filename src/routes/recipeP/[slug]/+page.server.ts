@@ -79,8 +79,6 @@ export const actions: Actions = {
             .eq('id', id)
             .single();
 
-        //console.log(recipeData);
-
         if (fetchError || !recipeData) {
             return { error: 'Recipe not found' };
         }

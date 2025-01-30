@@ -1,8 +1,14 @@
 <script lang="ts">
     import RecipeCard from "../components/RecipeCard.svelte";
-    import {onMount} from "svelte";
     import ScrollToTopButton from "../components/ScrollToTopButton.svelte";
-    export let data: { recipes: { id: bigint, name: string, image: string, difficulty: string }[] };
+    import {onMount} from "svelte";
+    export let data: {
+        recipes: {
+            id: bigint,
+            name: string,
+            image: string,
+            difficulty: string
+        }[] };
 
     let scrollToTopVisible = false;
 
@@ -56,8 +62,7 @@
     .search-container {
         width: 100%;
         max-width: 600px;
-        margin: 20px auto;
-        margin-top: 5px;
+        margin: 5px auto 20px;
         display: flex;
         justify-content: center;
     }
