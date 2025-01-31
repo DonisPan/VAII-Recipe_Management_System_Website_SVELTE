@@ -1,13 +1,43 @@
 <script lang="ts">
-    export let error: { error: string } | null = null;
+    export let data: {
+        categories: { id: number; name: string }[];
+        ingredients: { id: number; name: string; units: string }[];
+        error: { error: string } | null;
+    };
+
+    let selectedCategories: number[] = [];
+    let selectedIngredients: { id: number; name: string; amount: number; units: string }[] = [];
+
+
+    // ADD INGREDIENT TO LIST
+    let selectedIngredientId: number | null = null;
+    let ingredientAmount: number | null = null;
+    function addIngredient() {
+        if (selectedIngredientId !== null && ingredientAmount !== null && ingredientAmount > 0) {
+            const ingredient = data.ingredients.find(ing => ing.id === selectedIngredientId);
+            if (ingredient) {
+                selectedIngredients = [
+                    ...selectedIngredients,
+                    { id: ingredient.id, name: ingredient.name, amount: ingredientAmount, units: ingredient.units }
+                ];
+                selectedIngredientId = null;
+                ingredientAmount = null;
+            }
+        }
+    }
+
+    // REMOVE INGREDIENT FROM LIST
+    function removeIngredient(id: number) {
+        selectedIngredients = selectedIngredients.filter(ing => ing.id !== id);
+    }
 </script>
 
 <div class="recipe-page">
 
     <div class="recipe-header">
         <h1>Create a New Recipe</h1>
-        {#if error?.error}
-            <p class="error-message">{error.error}</p>
+        {#if data.error?.error}
+            <p class="error-message">{data.error.error}</p>
         {/if}
     </div>
 
@@ -39,6 +69,58 @@
             </select>
         </div>
 
+        <div class="recipe-input-group">
+            <label for="category">Select Categories</label>
+            <div class="category-list">
+                {#each data.categories as category}
+                    <label class="category-option" for={`category-${category.id}`} title={category.name}>
+                        <input
+                                type="checkbox"
+                                id={`category-${category.id}`}
+                                name="categories[]"
+                                value={category.id}
+                                bind:group={selectedCategories}
+                        />
+                        {category.name}
+                    </label>
+                {:else}
+                    <p class="error-message">No categories available</p>
+                {/each}
+            </div>
+        </div>
+
+        <div class="recipe-input-group">
+            <label for="ingredients">Add Ingredients</label>
+            <div class="ingredient-selection">
+                <select bind:value={selectedIngredientId}>
+                    <option value="" disabled selected>Select Ingredient</option>
+                    {#each data.ingredients as ingredient}
+                        <option value={ingredient.id}>{ingredient.name} ({ingredient.units})</option>
+                    {/each}
+                </select>
+                <input type="number" min="1" bind:value={ingredientAmount} placeholder="Amount" />
+                <button type="button" class="add-ingredient-btn" onclick={addIngredient}>Add</button>
+            </div>
+        </div>
+
+        <input type="hidden" name="ingredients" value={JSON.stringify(selectedIngredients)} />
+
+        {#each selectedCategories as category}
+            <input type="hidden" name="selectedCategories[]" value={category} />
+        {/each}
+
+        <div class="ingredient-list">
+            {#each selectedIngredients as ingredient}
+                <div class="ingredient-item">
+                    <span class="ingredient-text">{ingredient.name} - {ingredient.amount} {ingredient.units}</span>
+                    <button type="button" class="remove-ingredient-btn" onclick={() => removeIngredient(ingredient.id)}>
+                        ✖
+                    </button>
+                </div>
+            {/each}
+        </div>
+
+
         <div class="recipe-actions">
             <button type="submit">Create Recipe</button>
         </div>
@@ -55,20 +137,20 @@
         max-width: 850px;
         margin: 2rem auto;
         padding: 2rem;
-        border-radius: 20px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        border-radius: 16px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
         background-color: var(--light-dun);
     }
 
     .recipe-header {
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
 
     .recipe-header h1 {
-        font-size: 2.8rem;
+        font-size: 2.5rem;
+        font-weight: 600;
         color: var(--tekhelet);
-        margin-bottom: 0.5rem;
     }
 
     form {
@@ -84,8 +166,8 @@
     }
 
     label {
-        font-size: 1.2rem;
-        font-weight: bold;
+        font-size: 1.1rem;
+        font-weight: 500;
         color: var(--tekhelet);
     }
 
@@ -95,10 +177,10 @@
         width: 100%;
         padding: 0.75rem;
         border: 1px solid var(--tekhelet);
-        border-radius: 12px;
+        border-radius: 10px;
         font-size: 1rem;
-        background-color: var(--light-dun);
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        background-color: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
         transition: box-shadow 0.3s ease;
     }
 
@@ -111,12 +193,140 @@
 
     textarea {
         resize: none;
-        height: 150px;
+        height: 140px;
     }
 
-    .recipe-actions {
+    .category-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 8px;
+        padding: 12px;
+        border: 1px solid var(--tekhelet);
+        border-radius: 12px;
+        background-color: var(--light-dun);
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .category-list::-webkit-scrollbar {
+        width: 6px;
+    }
+    .category-list::-webkit-scrollbar-thumb {
+        background: var(--tekhelet);
+        border-radius: 6px;
+    }
+    .category-list::-webkit-scrollbar-track {
+        background: var(--light-dun);
+    }
+
+    .category-option {
         display: flex;
-        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--tekhelet);
+        background-color: white;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.2s ease, transform 0.1s ease;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .category-option input {
+        flex-shrink: 0;
+        width: 18px;
+        height: 18px;
+        accent-color: var(--tekhelet);
+    }
+
+    .category-option:hover {
+        background-color: var(--mountbatten-pink);
+        transform: scale(1.02);
+    }
+
+    .ingredient-selection {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .ingredient-list {
+        margin-top: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        max-height: 180px;
+        overflow-y: auto;
+        border: 1px solid var(--tekhelet);
+        padding: 12px;
+        border-radius: 12px;
+        background-color: var(--light-dun);
+    }
+
+    .ingredient-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 12px;
+        border-radius: 8px;
+        background-color: white;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+
+    .ingredient-item:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    .ingredient-text {
+        flex: 1;
+        color: var(--tekhelet);
+        text-align: left;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .remove-ingredient-btn {
+        background-color: var(--delete-button);
+        color: white;
+        font-size: 1rem;
+        font-weight: bold;
+        padding: 6px 10px;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+        min-width: 32px;
+        min-height: 32px;
+    }
+
+    .remove-ingredient-btn:hover {
+        background-color: #bf2116;
+        transform: scale(1.1);
+    }
+    .remove-ingredient-btn:active {
+        background-color: #d52519;
+        transform: scale(1);
+    }
+
+    .ingredient-list::-webkit-scrollbar {
+        width: 6px;
+    }
+    .ingredient-list::-webkit-scrollbar-thumb {
+        background: var(--tekhelet);
+        border-radius: 6px;
+    }
+    .ingredient-list::-webkit-scrollbar-track {
+        background: var(--light-dun);
     }
 
     button {
@@ -128,7 +338,7 @@
         border-radius: 12px;
         cursor: pointer;
         transition: background-color 0.3s ease, transform 0.2s ease;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
     }
 
     button:hover {
@@ -139,6 +349,12 @@
 
     button:active {
         transform: translateY(0);
+    }
+
+    .recipe-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 1rem;
     }
 
     @media (max-width: 768px) {
@@ -156,4 +372,5 @@
             font-size: 0.9rem;
         }
     }
+
 </style>
