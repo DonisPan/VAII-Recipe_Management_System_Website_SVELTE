@@ -274,29 +274,17 @@
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     }
 
+    /* HEADER */
     .recipe-header {
         position: relative;
         text-align: center;
         margin-bottom: 2rem;
     }
 
-    p {
-        margin: 0;
-        color: var(--ultra-violet);
-        line-height: 1.8;
-    }
-
     .recipe-header h1 {
         font-size: 2.8rem;
         color: var(--tekhelet);
         margin-bottom: 0.5rem;
-    }
-
-
-    h2 {
-        font-size: 2rem;
-        color: var(--tekhelet);
-        margin-bottom: 1rem;
     }
 
     .recipe-header h3 {
@@ -306,6 +294,7 @@
         color: var(--mountbatten-pink);
     }
 
+    /* IMAGE */
     .recipe-header img {
         margin-top: 1rem;
         width: 100%;
@@ -321,52 +310,21 @@
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
     }
 
-    .recipe-header label {
-        display: block;
-        font-size: 1.2rem;
-        font-weight: bold;
+    h2 {
+        font-size: 2rem;
         color: var(--tekhelet);
-        margin-bottom: 0.5rem;
-    }
-
-    .recipe-header input,
-    .recipe-header select {
-        width: 100%;
-        padding: 0.75rem;
         margin-bottom: 1rem;
-        border: 1px solid var(--tekhelet);
-        border-radius: 8px;
-        font-size: 1rem;
-        color: var(--tekhelet);
-        background-color: white;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
 
-    .recipe-header input:focus,
-    .recipe-header select:focus {
-        outline: none;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-
-    .recipe-header img {
-        margin-top: 1rem;
-        width: 100%;
-        max-height: 400px;
-        object-fit: cover;
-        border-radius: 15px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .recipe-header img:hover {
-        transform: scale(1.03);
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+    p {
+        margin: 0;
+        color: var(--ultra-violet);
+        line-height: 1.8;
     }
 
     .recipe-description,
     .recipe-ingredients,
-    .recipe-steps
-    {
+    .recipe-steps {
         background-color: var(--light-dun);
         border-radius: 12px;
         padding: 1.5rem;
@@ -376,7 +334,7 @@
         transition: background-color 0.3s ease, border-left-color 0.3s ease;
     }
 
-    /*CATEGORIES*/
+    /* CATEGORIES */
     .recipe-categories {
         display: flex;
         flex-wrap: wrap;
@@ -419,7 +377,7 @@
         transform: translateX(-50%) translateY(-4px);
     }
 
-    /*INGREDIENTS*/
+    /* INGREDIENTS */
     .ingredient-list {
         margin-top: 10px;
         display: flex;
@@ -458,18 +416,23 @@
         text-overflow: ellipsis;
     }
 
-    .ingredient-list::-webkit-scrollbar {
+    .ingredient-list::-webkit-scrollbar,
+    .recipe-categories::-webkit-scrollbar {
         width: 6px;
     }
-    .ingredient-list::-webkit-scrollbar-thumb {
+
+    .ingredient-list::-webkit-scrollbar-thumb,
+    .recipe-categories::-webkit-scrollbar-thumb {
         background: var(--tekhelet);
         border-radius: 6px;
     }
-    .ingredient-list::-webkit-scrollbar-track {
+
+    .ingredient-list::-webkit-scrollbar-track,
+    .recipe-categories::-webkit-scrollbar-track {
         background: var(--light-dun);
     }
 
-    /*BUTTONS*/
+    /* BUTTONS */
     .buttons {
         display: flex;
         justify-content: center;
@@ -491,7 +454,7 @@
         transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
     }
 
-    /*DELETE BUTTON*/
+    /* DELETE BUTTON */
     .delete-button button {
         background-color: var(--delete-button);
     }
@@ -508,7 +471,7 @@
         box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     }
 
-    /*EDIT BUTTON*/
+    /* EDIT BUTTON */
     .edit-button button {
         background-color: var(--edit-button);
     }
@@ -525,96 +488,7 @@
         box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     }
 
-    .recipe-description {
-        background-color: var(--light-dun);
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        border: 1px solid var(--tekhelet);
-        border-left: 6px solid var(--ultra-violet);
-        transition: background-color 0.3s ease, border-left-color 0.3s ease;
-    }
-
-    .recipe-description label {
-        font-size: 1.2rem;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
-        color: var(--tekhelet);
-    }
-
-    .recipe-description textarea {
-        width: 100%;
-        height: 150px;
-        padding: 0.75rem;
-        border: 1px solid var(--tekhelet);
-        border-radius: 8px;
-        font-size: 1rem;
-        resize: none;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .recipe-description textarea:focus {
-        outline: none;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Buttons container */
-    .buttons {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 1rem;
-        margin-top: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    /* Button styles */
-    .buttons button {
-        color: white;
-        font-size: 1rem;
-        font-weight: bold;
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-    }
-
-    /* DELETE button styles */
-    .delete-button button {
-        background-color: var(--delete-button);
-    }
-
-    .delete-button button:hover {
-        background-color: #bf2116;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-    }
-
-    .delete-button button:active {
-        background-color: #d52519;
-        transform: translateY(0);
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    /* SAVE button styles */
-    .edit-button button {
-        background-color: var(--edit-button);
-    }
-
-    .edit-button button:hover {
-        background-color: #316bff;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-    }
-
-    .edit-button button:active {
-        background-color: #1859ff;
-        transform: translateY(0);
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-    }
-
+    /* FAVOURITE BUTTON */
     .favorite-btn {
         position: absolute;
         right: 2rem;
@@ -644,6 +518,7 @@
         stroke: #FFD700;
     }
 
+    /* RESPONSIVE */
     @media (max-width: 768px) {
         .recipe-page {
             padding: 1.5rem;
@@ -663,4 +538,5 @@
             height: 28px;
         }
     }
+
 </style>

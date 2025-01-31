@@ -5,7 +5,6 @@ import cookie from 'cookie';
 export const handle: Handle = async ({ event, resolve }) => {
     const cookies = cookie.parse(event.request.headers.get('cookie') || '');
     const accessToken = cookies['sb-access-token'];
-    // console.log('Access Token:', accessToken);
 
     if (accessToken) {
         try {

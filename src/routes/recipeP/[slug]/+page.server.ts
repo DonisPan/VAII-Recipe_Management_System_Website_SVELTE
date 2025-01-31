@@ -1,5 +1,6 @@
 import { supabase } from '$lib/supabase';
 import type {PageServerLoad, Actions} from './$types';
+import {fail} from "@sveltejs/kit";
 
 export const load: PageServerLoad = async ({params, locals}): Promise<any> => {
     const id = BigInt(params.slug);
@@ -94,7 +95,6 @@ export const load: PageServerLoad = async ({params, locals}): Promise<any> => {
         };
     });
 
-
     // CREATE RECIPE FOR CLIENT
     const recipe = {
         user_id: recipeData.user_id,
@@ -113,7 +113,7 @@ export const load: PageServerLoad = async ({params, locals}): Promise<any> => {
         .select('recipe_id')
         .eq('recipe_id', id)
         .eq('user_id', currentUser)
-        .single();
+        .maybeSingle();
 
     if (favouriteError) {
         console.error('Error fetching favourite data:', favouriteError.message);
@@ -125,7 +125,8 @@ export const load: PageServerLoad = async ({params, locals}): Promise<any> => {
 
 export const actions: Actions = {
     // DELETE RECIPE
-    deleteRecipe: async ({ params }) => {
+    deleteRecipe: async ({ params, locals }) => {
+
         const id = BigInt(params.slug);
 
         console.log('Delete action triggered for:', params.slug);
@@ -135,9 +136,14 @@ export const actions: Actions = {
             .select('user_id')
             .eq('id', id)
             .single();
-
         if (fetchError || !recipeData) {
-            return { error: 'Recipe not found' };
+            return fail(500, { error: 'Recipe not found' });
+        }
+
+        // VALIDATION
+        if (locals.currentUser !== recipeData.user_id || locals.currentRole !== 'superadmin') {
+            console.error('Not authorised to delete this recipe');
+            return fail(400, { error: 'Not authorised to delete this recipe' });
         }
 
         const { error: deleteError } = await supabase
@@ -146,22 +152,23 @@ export const actions: Actions = {
             .eq('id', id);
 
         if (deleteError) {
-            return { error: deleteError.message };
+            return fail(401, { error: deleteError.message });
         }
         return true;
     },
 
     // UPDATE RECIPE
-    updateRecipe: async ({ params, request }) => {
+    updateRecipe: async ({ params, request, locals }) => {
         const id = BigInt(params.slug);
 
         const formData = await request.formData();
-        console.log(formData);
+
         const name = formData.get('name') as string;
         const difficulty = formData.get('difficulty') as string;
         const description = formData.get('description') as string;
         const imageFile = formData.get('image') as File;
-        const {data: imageData }= await supabase.from('ck_recipe').select('image').eq('id', id).single()
+
+        const {data: imageData }= await supabase.from('ck_recipe').select('image, user_id').eq('id', id).single()
         let imagePath = imageData?.image;
 
         // IF NEW IMAGE
@@ -172,23 +179,32 @@ export const actions: Actions = {
 
             if (error) {
                 console.error('Image upload failed:', error.message);
-                return { error: 'Image upload failed' };
+                return fail(401, { error: 'Image upload failed' });
             }
 
             imagePath = data.path;
         }
 
+        // VALIDATION
+        if (locals.currentUser !== imageData?.user_id || locals.currentRole !== 'superadmin') {
+            console.error('Not authorised to update this recipe');
+            return fail(400, { error: 'Not authorised to update this recipe' });
+        }
+
         // UPDATE RECIPE
-        const { error } = await supabase.from('ck_recipe').update({
-            name,
-            difficulty,
-            description,
-            image: imagePath,
-        }).eq('id', id);
+        const { error } = await supabase
+            .from('ck_recipe')
+            .update({
+                name,
+                difficulty,
+                description,
+                image: imagePath,
+            })
+            .eq('id', id);
 
         if (error) {
             console.error('Failed to update recipe:', error.message);
-            return { error: 'Failed to update recipe' };
+            return fail(401, { error: 'Failed to update recipe' });
         }
 
         return { success: true };
