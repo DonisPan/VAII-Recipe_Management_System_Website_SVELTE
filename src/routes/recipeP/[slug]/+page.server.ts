@@ -4,43 +4,98 @@ import type {PageServerLoad, Actions} from './$types';
 export const load: PageServerLoad = async ({params, locals}): Promise<any> => {
     const id = BigInt(params.slug);
 
-    //LOAD LOCALS
+    // LOAD LOCALS
     let currentUser = locals.currentUser;
     let currentRole = locals.currentRole;
 
-    //LOAD RECIPE
+    // LOAD RECIPE
     const { data: recipeData, error: recipeError } = await supabase
         .from('ck_recipe')
         .select('name, user_id, description, image, difficulty')
         .eq('id', id)
         .single();
-
     if (recipeError) {
         console.error(`Error fetching recipe with ID ${id}:`, recipeError.message);
         return { recipe: null };
     }
 
-    //LOAD RECIPE OWNER
+    // LOAD RECIPE OWNER
     const { data: authorData, error: authorError } = await supabase
         .from('ck_person')
         .select('name, surname')
         .eq('id', recipeData.user_id)
         .single();
-
     if (authorError) {
         console.error('Error fetching author data:', authorError.message);
     }
 
-    //LOAD RECIPE IMAGE
+    // LOAD RECIPE IMAGE
     const imagePath = recipeData.image;
     let imageUrl = '';
-
     if (imagePath) {
-        const { data: publicData } = supabase.storage.from('images').getPublicUrl(imagePath);
-        imageUrl = publicData.publicUrl || '';
+        const { data: storageData } = supabase.storage.from('images').getPublicUrl(imagePath);
+        imageUrl = storageData.publicUrl || '';
     }
 
-    //CREATE RECIPE FOR CLIENT
+    // LOAD RECIPE CATEGORIES
+    const { data: recipeCategories, error: recipeCategoriesError } = await supabase
+        .from('ck_recipe_categories')
+        .select('category_id')
+        .eq('recipe_id', id);
+    if (recipeCategoriesError) {
+        console.error('Error fetching recipe ingredients:', recipeCategoriesError.message);
+    }
+
+    // LOAD CATEGORIES DATA
+    const categoryIds = recipeCategories?.map(category => category.category_id) ?? [];
+    const { data: categoriesData, error: categoriesDataError } = await supabase
+        .from('ck_category')
+        .select('id, name, description')
+        .in('id', categoryIds);
+    if (categoriesDataError) {
+        console.error('Error fetching ingredients:', categoriesDataError.message);
+    }
+
+    // MERGE CATEGORIES DATA
+    const categories = recipeCategories?.map(rc => {
+        const categoryDetails = categoriesData?.find(cat => cat.id === rc.category_id);
+        return {
+            name: categoryDetails?.name || 'Unknown',
+            description: categoryDetails?.description || 'Unknown',
+        };
+    });
+
+    // LOAD RECIPE INGREDIENTS
+    const { data: recipeIngredients, error: recipeIngredientsError } = await supabase
+        .from('ck_recipe_ingredients')
+        .select('ingredient_id, amount')
+        .eq('recipe_id', id);
+    if (recipeIngredientsError) {
+        console.error('Error fetching recipe ingredients:', recipeIngredientsError.message);
+    }
+
+    // LOAD INGREDIENTS DATA
+    const ingredientIds = recipeIngredients?.map(ingredient => ingredient.ingredient_id) ?? [];
+    const { data: ingredientsData, error: ingredientsDataError } = await supabase
+        .from('ck_ingredient')
+        .select('id, name, units')
+        .in('id', ingredientIds);
+    if (ingredientsDataError) {
+        console.error('Error fetching ingredients:', ingredientsDataError.message);
+    }
+
+    // COMBINE INGREDIENTS DATA
+    const ingredients = recipeIngredients?.map(ri => {
+        const ingredientDetails = ingredientsData?.find(ing => ing.id === ri.ingredient_id);
+        return {
+            name: ingredientDetails?.name || 'Unknown',
+            amount: ri.amount,
+            units: ingredientDetails?.units || '',
+        };
+    });
+
+
+    // CREATE RECIPE FOR CLIENT
     const recipe = {
         user_id: recipeData.user_id,
         name: recipeData.name,
@@ -48,9 +103,11 @@ export const load: PageServerLoad = async ({params, locals}): Promise<any> => {
         description: recipeData.description,
         image: imageUrl,
         difficulty: recipeData.difficulty || 'Unknown',
+        ingredients: ingredients,
+        categories: categories,
     };
 
-    //CHECK IF IS FAVOURITE
+    // CHECK IF IS FAVOURITE
     const { data: favouriteData, error: favouriteError } = await supabase
         .from('ck_user_favourites')
         .select('recipe_id')

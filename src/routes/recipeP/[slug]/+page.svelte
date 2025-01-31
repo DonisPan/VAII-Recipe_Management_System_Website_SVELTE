@@ -1,6 +1,6 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
-    export let data: { recipe: any, id: any, currentUser: any, currentRole: any, isFavourite: boolean };
+    export let data: { recipe: any, id: any, currentUser: any, currentRole: any, isFavourite: boolean, };
     const currentUser = data.currentUser;
     const currentRole = data.currentRole;
 
@@ -98,12 +98,13 @@
 {#if !isEditing}
 
     <div class="recipe-page">
-
         {#if recipe}
 
+            <!--HEADER-->
             <div class="recipe-header">
                 <h1>{recipe.name}</h1>
-<!--                show favourites button only if some user is logged in-->
+
+                <!--SHOW FAVOURITE BUTTON ONLY IF USER IS LOGGED IN-->
                 {#if currentRole !== null}
                 <button class="favorite-btn"
                         onclick={toggleFavorite}
@@ -118,27 +119,49 @@
                 </button>
                 {/if}
 
+                <!--CATEGORIES-->
+                <h3 class="recipe-categories">
+                    {#each recipe.categories as category}
+                        <span class="recipe-category" data-description={category.description}>
+                            {category.name}
+                        </span>
+                    {/each}
+                </h3>
+
+                <!--AUTHOR-->
                 <h3>Author: {recipe.author}</h3>
+                <!--DIFFICULTY-->
                 <h3>Difficulty: {recipe.difficulty}</h3>
+                <!--IMAGE-->
                 <img src={recipe.image} alt="recipe_image" />
             </div>
 
+            <!--DESCRIPTION-->
             <div class="recipe-description">
                 <h2>Recipe Description</h2>
                 <p>{recipe.description}</p>
             </div>
 
+            <!--INGREDIENTS-->
             <div class="recipe-ingredients">
                 <h2>Recipe Ingredients</h2>
+                <div class="ingredient-list">
+                    {#each recipe.ingredients as ingredient}
+                        <div class="ingredient-item">
+                            <span class="ingredient-text">{ingredient.name} - {ingredient.amount} {ingredient.units}</span>
+                        </div>
+                    {/each}
+                </div>
                 <p></p>
             </div>
 
+            <!--STEPS-->
             <div class="recipe-steps">
                 <h2>Recipe Steps</h2>
                 <p></p>
             </div>
 
-<!--            show the delete and update recipe buttons only if the user is the creator of the recipe or is superadmin-->
+            <!--SHOW THE DELETE/EDIT BUTTONS ONLY IF THE USER IS THE OWNER OR SUPERADMIN-->
             {#if currentUser === recipe.user_id || currentRole === 'superadmin'}
                 <div class="buttons">
                     <div class="delete-button">
@@ -257,10 +280,23 @@
         margin-bottom: 2rem;
     }
 
+    p {
+        margin: 0;
+        color: var(--ultra-violet);
+        line-height: 1.8;
+    }
+
     .recipe-header h1 {
         font-size: 2.8rem;
         color: var(--tekhelet);
         margin-bottom: 0.5rem;
+    }
+
+
+    h2 {
+        font-size: 2rem;
+        color: var(--tekhelet);
+        margin-bottom: 1rem;
     }
 
     .recipe-header h3 {
@@ -283,93 +319,6 @@
     .recipe-header img:hover {
         transform: scale(1.03);
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
-    }
-
-    .recipe-description,
-    .recipe-ingredients,
-    .recipe-steps
-    {
-        background-color: var(--light-dun);
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        border: 1px solid var(--tekhelet);
-        border-left: 6px solid var(--ultra-violet);
-        transition: background-color 0.3s ease, border-left-color 0.3s ease;
-    }
-
-    /* Container for the buttons */
-    .buttons {
-        display: flex; /* Enable flexbox */
-        justify-content: center; /* Center horizontally */
-        align-items: center; /* Align buttons vertically */
-        gap: 1rem; /* Add spacing between buttons */
-        margin-top: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    /* Common styles for buttons */
-    .buttons button {
-        color: white; /* White text */
-        font-size: 1rem; /* Adjust font size */
-        font-weight: bold; /* Bold text */
-        padding: 0.75rem 1.5rem; /* Padding for a comfortable click area */
-        border: none; /* No default border */
-        border-radius: 8px; /* Rounded corners */
-        cursor: pointer; /* Pointer cursor on hover */
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Subtle shadow */
-        transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-    }
-
-    /* DELETE button styles */
-    .delete-button button {
-        background-color: var(--delete-button); /* Bright red */
-    }
-
-    .delete-button button:hover {
-        background-color: #bf2116; /* Darker red on hover */
-        transform: translateY(-2px); /* Slight lift effect */
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3); /* Enhance shadow */
-    }
-
-    .delete-button button:active {
-        background-color: #d52519; /* Even darker red when pressed */
-        transform: translateY(0); /* Reset lift effect */
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2); /* Reduce shadow */
-    }
-
-    /* EDIT button styles */
-    .edit-button button {
-        background-color: var(--edit-button); /* Bright green */
-    }
-
-    .edit-button button:hover {
-        background-color: #316bff; /* Darker green on hover */
-        transform: translateY(-2px); /* Slight lift effect */
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3); /* Enhance shadow */
-    }
-
-    .edit-button button:active {
-        background-color: #1859ff; /* Even darker green when pressed */
-        transform: translateY(0); /* Reset lift effect */
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2); /* Reduce shadow */
-    }
-
-    h2 {
-        font-size: 2rem;
-        color: var(--tekhelet);
-        margin-bottom: 1rem;
-    }
-
-    p {
-        margin: 0;
-        color: var(--ultra-violet);
-        line-height: 1.8;
-    }
-
-    .recipe-header {
-        text-align: center;
-        margin-bottom: 2rem;
     }
 
     .recipe-header label {
@@ -412,6 +361,168 @@
     .recipe-header img:hover {
         transform: scale(1.03);
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+    }
+
+    .recipe-description,
+    .recipe-ingredients,
+    .recipe-steps
+    {
+        background-color: var(--light-dun);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--tekhelet);
+        border-left: 6px solid var(--ultra-violet);
+        transition: background-color 0.3s ease, border-left-color 0.3s ease;
+    }
+
+    /*CATEGORIES*/
+    .recipe-categories {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    .recipe-category {
+        position: relative;
+        font-size: 1.2rem;
+        font-weight: 500;
+        color: var(--mountbatten-pink);
+        padding: 6px 12px;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+
+    .recipe-category::after {
+        content: attr(data-description);
+        position: absolute;
+        bottom: 130%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--light-dun);
+        color: var(--tekhelet);
+        padding: 6px 10px;
+        font-size: 0.9rem;
+        border-radius: 8px;
+        white-space: nowrap;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, transform 0.2s ease;
+    }
+
+    .recipe-category:hover::after {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(-4px);
+    }
+
+    /*INGREDIENTS*/
+    .ingredient-list {
+        margin-top: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        max-height: 180px;
+        overflow-y: auto;
+        border: 1px solid var(--tekhelet);
+        padding: 12px;
+        border-radius: 12px;
+        background-color: var(--light-dun);
+    }
+
+    .ingredient-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 12px;
+        border-radius: 8px;
+        background-color: white;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+
+    .ingredient-item:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    .ingredient-text {
+        flex: 1;
+        color: var(--tekhelet);
+        text-align: left;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .ingredient-list::-webkit-scrollbar {
+        width: 6px;
+    }
+    .ingredient-list::-webkit-scrollbar-thumb {
+        background: var(--tekhelet);
+        border-radius: 6px;
+    }
+    .ingredient-list::-webkit-scrollbar-track {
+        background: var(--light-dun);
+    }
+
+    /*BUTTONS*/
+    .buttons {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .buttons button {
+        color: white;
+        font-size: 1rem;
+        font-weight: bold;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    /*DELETE BUTTON*/
+    .delete-button button {
+        background-color: var(--delete-button);
+    }
+
+    .delete-button button:hover {
+        background-color: #bf2116;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .delete-button button:active {
+        background-color: #d52519;
+        transform: translateY(0);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /*EDIT BUTTON*/
+    .edit-button button {
+        background-color: var(--edit-button);
+    }
+
+    .edit-button button:hover {
+        background-color: #316bff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .edit-button button:active {
+        background-color: #1859ff;
+        transform: translateY(0);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     }
 
     .recipe-description {
