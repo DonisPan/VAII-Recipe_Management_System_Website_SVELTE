@@ -1,5 +1,5 @@
 import { supabase } from '$lib/supabase';
-import type {PageServerLoad, Actions} from './$types';
+import type {PageServerLoad} from './$types';
 
 export const load: PageServerLoad = async ({params, locals}): Promise<any> => {
     const id = BigInt(params.slug);
