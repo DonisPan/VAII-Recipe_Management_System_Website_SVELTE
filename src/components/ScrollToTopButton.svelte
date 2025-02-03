@@ -32,6 +32,8 @@
         cursor: pointer;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+
+        z-index: 9999;
     }
 
     .scroll-to-top:hover {
