@@ -8,27 +8,41 @@
     let recipe = data.recipe;
     let id = data.id;
 
+    // CHANGE TO EDITING PAGE
     function editRecipe() {
         isEditing = !isEditing;
+    }
+
+    // INPUT IMAGE HANDLING
+    let imageFile: File | null = null;
+    function handleFileInput(event: Event) {
+        const target = event.target as HTMLInputElement;
+        if (target?.files?.[0]) {
+            imageFile = target.files[0];
+        }
     }
 
     // FAVOURITE/UNFAVOURITE RECIPE
     let isFavorite = data.isFavourite;
     async function toggleFavorite() {
         if (isFavorite) {
-            const response = await fetch(`/recipeP/${id}?/unFavouriteRecipe`, {
+            const response = await fetch(`/api/recipeP/${id}/unfavouriteRecipe`, {
                 method: 'POST',
                 body: new URLSearchParams({ action: 'unFavouriteRecipe' }),
             });
-            if (response.ok) {
+
+            const responseData = await response.json();
+            if (responseData.success) {
                 isFavorite = false;
             }
         } else {
-            const response = await fetch(`/recipeP/${id}?/favouriteRecipe`, {
+            const response = await fetch(`/api/recipeP/${id}/favouriteRecipe`, {
                 method: 'POST',
                 body: new URLSearchParams({ action: 'favouriteRecipe' }),
             });
-            if (response.ok) {
+
+            const responseData = await response.json();
+            if (responseData.success) {
                 isFavorite = true;
             }
         }
@@ -41,52 +55,33 @@
             return;
         }
 
-        const response = await fetch(`/recipeP/${id}?/deleteRecipe`, {
+        const response = await fetch(`/api/recipeP/${id}/deleteRecipe`, {
             method: 'POST',
             body: new URLSearchParams({ action: 'deleteRecipe' }),
         });
 
-        if (response.ok) {
-            alert('Recipe deleted successfully!');
+        const responseData = await response.json();
+        if (responseData.success) {
             await goto('/');
-        } else {
-            alert('Failed to delete recipe. Please try again.');
         }
-    }
-
-    let imageFile: File | null = null;
-    function handleFileInput(event: Event) {
-        const target = event.target as HTMLInputElement;
-        if (target?.files?.[0]) {
-            imageFile = target.files[0];
-        }
+        alert(responseData.message);
     }
 
     async function updateRecipe(event: Event) {
         event.preventDefault();
 
         const formData = new FormData(event.target as HTMLFormElement);
+        const response = await fetch(`/api/recipeP/${id}/updateRecipe`, {
+            method: 'POST',
+            body: formData,
+        });
 
-        try {
-            const response = await fetch(`/recipeP/${id}?/updateRecipe`, {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                alert(`Failed to update the recipe: ${error.message}`);
-
-            } else {
-                alert('Recipe updated successfully!');
-                isEditing = false;
-                location.reload();
-            }
-
-        } catch (error) {
-            console.error('Error updating recipe:', error);
-            alert('An unexpected error occurred.');
+        const responseData = await response.json();
+        if (responseData.success) {
+            isEditing = false;
+            location.reload();
         }
+        alert(responseData.message);
     }
 
 </script>
