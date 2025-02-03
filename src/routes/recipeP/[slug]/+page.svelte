@@ -16,23 +16,19 @@
     let isFavorite = data.isFavourite;
     async function toggleFavorite() {
         if (isFavorite) {
-            console.log('unFavorite clicked');
             const response = await fetch(`/recipeP/${id}?/unFavouriteRecipe`, {
                 method: 'POST',
                 body: new URLSearchParams({ action: 'unFavouriteRecipe' }),
             });
             if (response.ok) {
-                console.log(response);
                 isFavorite = false;
             }
         } else {
-            console.log('Favorite clicked');
             const response = await fetch(`/recipeP/${id}?/favouriteRecipe`, {
                 method: 'POST',
                 body: new URLSearchParams({ action: 'favouriteRecipe' }),
             });
             if (response.ok) {
-                console.log(response);
                 isFavorite = true;
             }
         }

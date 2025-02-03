@@ -2,13 +2,7 @@
     import RecipeCard from "../components/RecipeCard.svelte";
     import ScrollToTopButton from "../components/ScrollToTopButton.svelte";
     import {onMount} from "svelte";
-    export let data: {
-        recipes: {
-            id: bigint,
-            name: string,
-            image: string,
-            difficulty: string
-        }[] };
+    export let data: { recipes: { id: bigint, name: string, image: string, difficulty: string }[] };
 
     let scrollToTopVisible = false;
 

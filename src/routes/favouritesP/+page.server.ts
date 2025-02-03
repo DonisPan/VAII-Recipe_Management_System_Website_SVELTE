@@ -17,7 +17,6 @@ export const load: PageServerLoad = async ({locals}): Promise<any> => {
             };
         }
 
-        // const recipeIds = favouriteData?.map(fav => fav.recipe_id) || [];
         const favoriteRecipes = favouriteData?.map(fav => ({
             recipe_id: fav.recipe_id,
             liked_at: fav.liked_at,
