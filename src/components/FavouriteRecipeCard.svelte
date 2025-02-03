@@ -10,7 +10,7 @@
     // FORMAT THE TIMESTAMP FROM SUPABASE
     function formatDate(dateString: string) {
         const date = new Date(dateString);
-        return date.toLocaleString(); // Adjust format as needed
+        return date.toLocaleString();
     }
 
     const handleClick = () => {
@@ -19,7 +19,6 @@
 
     // REMOVE FROM FAVOURITES
     async function removeFromFavorites() {
-
         const response = await fetch(`/recipeP/${id}?/unFavouriteRecipe`, {
             method: 'POST',
             body: new URLSearchParams({ action: 'unFavouriteRecipe' }),
@@ -40,9 +39,8 @@
             <div class="recipe-image">
                 <img src={image} alt={`Image of ${name}`} />
             </div>
-
             <div class="recipe-info">
-                <p class="recipe-name">{name}</p>
+                <h3 class="recipe-name">{name}</h3>
                 <p class="recipe-difficulty">Difficulty: {difficulty}</p>
                 <p class="recipe-timestamp">Liked at: {formatDate(liked_at)}</p>
             </div>
@@ -74,19 +72,19 @@
     .recipe-card {
         all: unset;
         margin: 0;
-        display: grid;
         width: 100%;
         max-width: 33vw;
         min-width: 250px;
         height: 380px;
-        grid-template-columns: 1fr;
-        grid-template-rows: auto 1fr;
-        gap: 15px;
-        background-color: var(--);
-        border: 4px solid var(--ultra-violet);
+        border: 2px solid var(--ultra-violet);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: white;
         border-radius: 12px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
     }
 
     .recipe-card:hover {
@@ -95,11 +93,10 @@
     }
 
     .recipe-image {
+        width: 100%;
+        height: 180px;
         background-color: var(--mountbatten-pink);
-        border-top-left-radius: 12px;
-        border-top-right-radius: 12px;
-        padding: 8px;
-        margin: 0;
+        border-radius: 8px;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -107,32 +104,26 @@
 
     .recipe-image img {
         width: 100%;
-        max-height: 150px;
+        height: 100%;
+        border-radius: 10px;
         object-fit: cover;
-        border-radius: 12px;
     }
 
     .recipe-info {
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        gap: 8px;
+        padding: 15px;
+        text-align: center;
     }
 
     .recipe-name {
-        font-size: 1.4rem;
-        color: var(--tekhelet);
+        font-size: 1.2rem;
         font-weight: bold;
-        text-align: center;
+        color: var(--tekhelet);
+        margin-bottom: 5px;
     }
 
     .recipe-difficulty {
-        font-size: 1.1rem;
+        font-size: 1rem;
         color: var(--ultra-violet);
-        font-weight: 500;
-        text-align: center;
     }
 
     .recipe-timestamp {
