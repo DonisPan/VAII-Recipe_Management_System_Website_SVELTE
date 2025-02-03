@@ -1,0 +1,363 @@
+<script lang="ts">
+    import RecipeCard from "../../components/RecipeCard.svelte";
+    import {writable} from "svelte/store";
+
+    export let data: {
+        profile: { name: string; surname: string; role: string };
+        recipes: { id: bigint; name: string; image: string; difficulty: string }[];
+        requests: { id: string, name: string; surname: string, registered_at: string }[];
+    };
+
+    let requests = writable(data.requests);
+
+    function formatDate(dateString: string) {
+        const date = new Date(dateString);
+        return date.toLocaleString();
+    }
+
+    async function makeCookRequest(): Promise<any> {
+        const response = await fetch('../api/profileP/requestCookRole', {
+            method: 'POST',
+            body: new URLSearchParams({ action: 'requestCookRole' }),
+        });
+        const errorData = await response.json();
+        console.log('ErrorData: ', errorData);
+        if (response.ok) {
+            alert(errorData.message);
+        }
+    }
+
+    async function acceptRequest(userId: string): Promise<any> {
+        const response = await fetch(`?/acceptCookRequest`, {
+            method: 'POST',
+            body: new URLSearchParams({ user_id: userId }),
+        });
+
+        if (response.ok) {
+            alert(`Accepted request for user ${userId}`);
+            requests.update((r) => r.filter((req) => req.id !== userId)); // ✅ Remove request from UI
+        } else {
+            alert(`Failed to accept request for user ${userId}`);
+        }
+    }
+
+    async function declineRequest(userId: string): Promise<any> {
+        const response = await fetch(`?/rejectCookRequest`, {
+            method: 'POST',
+            body: new URLSearchParams({ user_id: userId }),
+        });
+
+        if (response.ok) {
+            alert(`Rejected request for user ${userId}`);
+            requests.update((r) => r.filter((req) => req.id !== userId)); // ✅ Remove request from UI
+        } else {
+            alert(`Failed to reject request for user ${userId}`);
+        }
+    }
+</script>
+
+<div class="profile-page">
+    <!-- PROFILE INFO -->
+    <div class="profile-header">
+        <h1 class="profile-name">{data.profile.name} {data.profile.surname}</h1>
+        <h3 class="role-badge">{data.profile.role}</h3>
+    </div>
+
+    {#if data.profile.role === 'regular'}
+        <button class="request-cook-button" onclick={makeCookRequest}>
+            Request Cook
+        </button>
+    {/if}
+
+    {#if data.profile.role === 'superadmin'}
+        <div class="requests-container">
+            <h2>Cook Requests</h2>
+            {#if data.requests}
+            <div class="request-list">
+                    {#each $requests as request}
+                        <div class="request-item">
+                            <span class="request-text">User: {request.name} {request.surname} - Registered at: {formatDate(request.registered_at)}</span>
+                            <div class="request-buttons">
+                                <button class="accept-btn" onclick={() => acceptRequest(request.id)}>✔ Accept</button>
+                                <button class="reject-btn" onclick={() => declineRequest(request.id)}>✖ Reject</button>
+                            </div>
+                        </div>
+                    {/each}
+                </div>
+            {:else}
+                <p class="no-requests">No pending requests.</p>
+            {/if}
+        </div>
+    {/if}
+
+    {#if data.profile.role === 'cook' || data.profile.role === 'superadmin'}
+        <div class="profile-recipes">
+            <h2>My Recipes:</h2>
+            {#if data.recipes.length > 0}
+                <div class="recipe-grid">
+                    {#each data.recipes as recipe}
+<!--                        <div class="recipe-card">-->
+<!--                            <div class="recipe-image">-->
+<!--                                <img src={recipe.image} alt={`Image of ${recipe.name}`} />-->
+<!--                            </div>-->
+<!--                            <div class="recipe-info">-->
+<!--                                <h3 class="recipe-name">{recipe.name}</h3>-->
+<!--                                <p class="recipe-difficulty">Difficulty: {recipe.difficulty}</p>-->
+<!--                            </div>-->
+<!--                        </div>-->
+                        <RecipeCard
+                                id={recipe.id}
+                                name={recipe.name}
+                                image={recipe.image}
+                                difficulty={recipe.difficulty}
+                        />
+                    {/each}
+                </div>
+            {:else}
+                <p class="no-recipes">You haven’t created any recipes yet.</p>
+            {/if}
+        </div>
+    {/if}
+</div>
+
+<style>
+    @import '/pallete.css';
+
+    .profile-page {
+        max-width: 900px;
+        margin: 3rem auto;
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        background-color: var(--light-dun);
+    }
+
+    .profile-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .profile-header h1 {
+        font-size: 2.8rem;
+        color: var(--tekhelet);
+        margin-bottom: 0.5rem;
+    }
+
+    .role-badge {
+        display: inline-block;
+        background-color: var(--tekhelet);
+        color: white;
+        font-size: 1rem;
+        font-weight: bold;
+        padding: 6px 12px;
+        border-radius: 8px;
+        margin-top: 0.5rem;
+    }
+
+    .profile-name {
+        font-size: 1.4rem;
+        font-weight: 300;
+        color: var(--mountbatten-pink);
+    }
+    .recipe-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+    }
+
+    .recipe-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .recipe-image {
+        width: 100%;
+        height: 180px;
+        background-color: var(--mountbatten-pink);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .recipe-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .recipe-info {
+        padding: 15px;
+        text-align: center;
+    }
+
+    .recipe-name {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: var(--tekhelet);
+        margin-bottom: 5px;
+    }
+
+    .recipe-difficulty {
+        font-size: 1rem;
+        color: var(--ultra-violet);
+    }
+
+    /* Request Cook Button */
+    .request-cook-button {
+        display: block;
+        margin: 1rem auto;
+        background-color: var(--ultra-violet);
+        color: white;
+        font-size: 1rem;
+        font-weight: bold;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .request-cook-button:hover {
+        background-color: var(--tekhelet);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .request-cook-button:active {
+        transform: translateY(0);
+    }
+
+    /* Requests Table */
+    .requests-container {
+        margin-top: 2rem;
+        padding: 1rem;
+        border-radius: 12px;
+        background-color: var(--light-dun);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .requests-container h2 {
+        text-align: center;
+        font-size: 1.6rem;
+        color: var(--tekhelet);
+        margin-bottom: 1rem;
+    }
+
+    .request-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid var(--tekhelet);
+        padding: 10px;
+        border-radius: 12px;
+        background-color: white;
+    }
+
+    .request-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background-color: white;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+
+    .request-item:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    .request-text {
+        flex: 1;
+        color: var(--tekhelet);
+        text-align: left;
+    }
+
+    .request-buttons {
+        display: flex;
+        gap: 6px;
+    }
+
+    .accept-btn, .reject-btn {
+        font-size: 0.9rem;
+        font-weight: bold;
+        padding: 6px 10px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+
+    .accept-btn {
+        background-color: var(--edit-button);
+        color: white;
+    }
+
+    .reject-btn {
+        background-color: var(--delete-button);
+        color: white;
+    }
+
+    .accept-btn:hover {
+        background-color: #2c7a2c;
+        transform: scale(1.05);
+    }
+
+    .reject-btn:hover {
+        background-color: #bf2116;
+        transform: scale(1.05);
+    }
+
+    .profile-recipes {
+        margin-top: 2rem;
+    }
+
+    .profile-recipes h2 {
+        text-align: center;
+        font-size: 2rem;
+        color: var(--tekhelet);
+        margin-bottom: 1rem;
+    }
+
+    .recipe-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        justify-content: center;
+    }
+
+    .no-recipes, .no-requests {
+        text-align: center;
+        font-size: 1.2rem;
+        color: var(--mountbatten-pink);
+        margin-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .profile-page {
+            padding: 1.5rem;
+        }
+
+        .profile-header h1 {
+            font-size: 2.2rem;
+        }
+
+        .recipe-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        .requests-container {
+            padding: 0.5rem;
+        }
+    }
+</style>
