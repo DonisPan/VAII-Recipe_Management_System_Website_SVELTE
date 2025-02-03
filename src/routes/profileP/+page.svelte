@@ -10,49 +10,49 @@
 
     let requests = writable(data.requests);
 
+    // PARSER FOR TIME
     function formatDate(dateString: string) {
         const date = new Date(dateString);
         return date.toLocaleString();
     }
 
-    async function makeCookRequest(): Promise<any> {
-        const response = await fetch('../api/profileP/requestCookRole', {
+    // MAKE COOK REQUEST
+    async function makeCookRequest(): Promise<void> {
+        const response = await fetch('/api/profileP/requestCookRole', {
             method: 'POST',
             body: new URLSearchParams({ action: 'requestCookRole' }),
         });
-        const errorData = await response.json();
-        console.log('ErrorData: ', errorData);
-        if (response.ok) {
-            alert(errorData.message);
+        const responseData = await response.json();
+        if (!responseData.success) {
+            alert(responseData.message);
         }
     }
 
-    async function acceptRequest(userId: string): Promise<any> {
-        const response = await fetch(`?/acceptCookRequest`, {
+    // ACCEPT PROMOTION REQUEST
+    async function acceptRequest(userId: string): Promise<void> {
+        const response = await fetch('api/profileP/acceptCookRequest', {
             method: 'POST',
             body: new URLSearchParams({ user_id: userId }),
         });
 
-        if (response.ok) {
-            alert(`Accepted request for user ${userId}`);
-            requests.update((r) => r.filter((req) => req.id !== userId)); // ✅ Remove request from UI
-        } else {
-            alert(`Failed to accept request for user ${userId}`);
+        const responseData = await response.json();
+        if (responseData.success) {
+            requests.update((r) => r.filter((req) => req.id !== userId));
         }
+        alert(responseData.message);
     }
 
     async function declineRequest(userId: string): Promise<any> {
-        const response = await fetch(`?/rejectCookRequest`, {
+        const response = await fetch('api/profileP/rejectCookRequest', {
             method: 'POST',
             body: new URLSearchParams({ user_id: userId }),
         });
 
-        if (response.ok) {
-            alert(`Rejected request for user ${userId}`);
-            requests.update((r) => r.filter((req) => req.id !== userId)); // ✅ Remove request from UI
-        } else {
-            alert(`Failed to reject request for user ${userId}`);
+        const responseData = await response.json();
+        if (responseData.success) {
+            requests.update((r) => r.filter((req) => req.id !== userId));
         }
+        alert(responseData.message);
     }
 </script>
 
@@ -96,15 +96,6 @@
             {#if data.recipes.length > 0}
                 <div class="recipe-grid">
                     {#each data.recipes as recipe}
-<!--                        <div class="recipe-card">-->
-<!--                            <div class="recipe-image">-->
-<!--                                <img src={recipe.image} alt={`Image of ${recipe.name}`} />-->
-<!--                            </div>-->
-<!--                            <div class="recipe-info">-->
-<!--                                <h3 class="recipe-name">{recipe.name}</h3>-->
-<!--                                <p class="recipe-difficulty">Difficulty: {recipe.difficulty}</p>-->
-<!--                            </div>-->
-<!--                        </div>-->
                         <RecipeCard
                                 id={recipe.id}
                                 name={recipe.name}
@@ -158,53 +149,6 @@
         font-size: 1.4rem;
         font-weight: 300;
         color: var(--mountbatten-pink);
-    }
-    .recipe-card {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        background-color: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        overflow: hidden;
-    }
-
-    .recipe-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    }
-
-    .recipe-image {
-        width: 100%;
-        height: 180px;
-        background-color: var(--mountbatten-pink);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .recipe-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .recipe-info {
-        padding: 15px;
-        text-align: center;
-    }
-
-    .recipe-name {
-        font-size: 1.2rem;
-        font-weight: bold;
-        color: var(--tekhelet);
-        margin-bottom: 5px;
-    }
-
-    .recipe-difficulty {
-        font-size: 1rem;
-        color: var(--ultra-violet);
     }
 
     /* Request Cook Button */
