@@ -67,6 +67,7 @@
         alert(responseData.message);
     }
 
+    // UPDATE RECIPE
     async function updateRecipe(event: Event) {
         event.preventDefault();
 

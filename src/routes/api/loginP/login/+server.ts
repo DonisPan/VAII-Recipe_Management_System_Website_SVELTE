@@ -12,8 +12,8 @@ export async function POST({ request, cookies }) {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
 
-    console.group('Requested role upgrade');
-    console.info('Email: ', email, ' Password: ', password);
+    console.group('Request Login');
+    console.info('Email: ', email);
 
     // FORM VALIDATION
     const validationResult = loginSchema.safeParse({ email, password });

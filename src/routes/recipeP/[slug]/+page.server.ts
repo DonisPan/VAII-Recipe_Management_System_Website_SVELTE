@@ -16,6 +16,7 @@ export const load: PageServerLoad = async ({params, locals}): Promise<any> => {
         .single();
     if (recipeError) {
         console.error(recipeError.message);
+        console.groupEnd();
         return { recipe: null };
     }
 
@@ -29,6 +30,7 @@ export const load: PageServerLoad = async ({params, locals}): Promise<any> => {
         .single();
     if (authorError) {
         console.error(authorError.message);
+        console.groupEnd();
         return { recipe: null };
     }
 
@@ -51,6 +53,7 @@ export const load: PageServerLoad = async ({params, locals}): Promise<any> => {
         .eq('recipe_id', id);
     if (recipeCategoriesError) {
         console.error(recipeCategoriesError.message);
+        console.groupEnd();
         return { recipe: null };
     }
 
@@ -64,6 +67,7 @@ export const load: PageServerLoad = async ({params, locals}): Promise<any> => {
         .in('id', categoryIds);
     if (categoriesDataError) {
         console.error(categoriesDataError.message);
+        console.groupEnd();
         return { recipe: null };
     }
 
@@ -87,6 +91,7 @@ export const load: PageServerLoad = async ({params, locals}): Promise<any> => {
         .eq('recipe_id', id);
     if (recipeIngredientsError) {
         console.error(recipeIngredientsError.message);
+        console.groupEnd();
         return { recipe: null };
     }
 
@@ -100,6 +105,7 @@ export const load: PageServerLoad = async ({params, locals}): Promise<any> => {
         .in('id', ingredientIds);
     if (ingredientsDataError) {
         console.error(ingredientsDataError.message);
+        console.groupEnd();
         return { recipe: null };
     }
 
@@ -140,6 +146,7 @@ export const load: PageServerLoad = async ({params, locals}): Promise<any> => {
         .maybeSingle();
     if (favouriteError) {
         console.error(favouriteError.message);
+        console.groupEnd();
         return { recipe: null };
     }
     let isFavourite = !!favouriteData;

@@ -10,6 +10,7 @@ export async function POST({ locals }) {
 
     if (!currentUser || currentRole !== 'regular') {
         console.error('Invalid role upgrade request.');
+        console.groupEnd();
         return json({ success: false, message: 'Invalid role upgrade request.' });
     }
 
@@ -20,11 +21,13 @@ export async function POST({ locals }) {
         .eq('user_id', currentUser);
     if (requestCookError) {
         console.error(requestCookError.message);
+        console.groupEnd();
         return json({ success: false, message: requestCookError.message });
     }
 
     if (requestCookData.length > 0) {
         console.error('User cook request already exists.');
+        console.groupEnd();
         return json({ success: false, message: 'User cook request already exists.' });
     }
 
@@ -34,6 +37,7 @@ export async function POST({ locals }) {
         .insert({ user_id: currentUser });
     if (requestInsertError) {
         console.error(requestInsertError.message);
+        console.groupEnd();
         return json({ success: false, message: requestInsertError.message });
     }
 

@@ -54,7 +54,7 @@
 </script>
 
 <div class="register_container">
-    <form on:submit={handleSignUp}>
+    <form onsubmit={handleSignUp}>
         <div class="register_container_box">
             <h1>Register</h1>
             {#if $clientError}
