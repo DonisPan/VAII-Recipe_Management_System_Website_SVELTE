@@ -1,66 +1,135 @@
 <script lang="ts">
+    import { goto } from '$app/navigation';
+    import { writable } from 'svelte/store';
+    import { z } from 'zod';
+
     export let data: {
         categories: { id: number; name: string }[];
         ingredients: { id: number; name: string; units: string }[];
-        error: { error: string } | null;
     };
 
-    let selectedCategories: number[] = [];
-    let selectedIngredients: { id: number; name: string; amount: number; units: string }[] = [];
+    let name = '';
+    let description = '';
+    let difficulty = '';
+    let selectedCategories = writable<number[]>([]);
+    let selectedIngredients = writable<{ id: number; name: string; amount: number; units: string }[]>([]);
 
-
-    // ADD INGREDIENT TO LIST
     let selectedIngredientId: number | null = null;
     let ingredientAmount: number | null = null;
+
+    const recipeSchema = z.object({
+        name: z.string().min(4, 'Recipe name is required.').max(60, 'Recipe name is too long'),
+        description: z.string().min(1, 'Description is required.').max(300, 'Try to keep the description shorter'),
+        difficulty: z.enum(['Easy', 'Medium', 'Hard', 'Insane'], { invalid_type_error: 'Difficulty is required.' }),
+        imageFile: z.instanceof(File, { message: 'Image file is required' }),
+        selectedCategories: z.array(z.number()).min(1, 'At least one category is required.'),
+        selectedIngredients: z.array(
+            z.object({
+                id: z.number(),
+                name: z.string(),
+                amount: z.number().positive('Amount must be greater than 0'),
+                units: z.string(),
+            })
+        ).min(1, 'At least one ingredient is required.'),
+    });
+
+    // INPUT IMAGE HANDLING
+    let imageFile: File | null = null;
+    function handleFileInput(event: Event) {
+        const target = event.target as HTMLInputElement;
+        if (target?.files?.[0]) {
+            imageFile = target.files[0];
+        }
+    }
+
+    // ADD INGREDIENT
     function addIngredient() {
         if (selectedIngredientId !== null && ingredientAmount !== null && ingredientAmount > 0) {
             const ingredient = data.ingredients.find(ing => ing.id === selectedIngredientId);
             if (ingredient) {
-                selectedIngredients = [
-                    ...selectedIngredients,
-                    { id: ingredient.id, name: ingredient.name, amount: ingredientAmount, units: ingredient.units }
-                ];
+                selectedIngredients.update(ingredients => [
+                    ...ingredients,
+                    {
+                        id: ingredient.id,
+                        name: ingredient.name,
+                        amount: ingredientAmount ?? 0,
+                        units: ingredient.units
+                    }
+                ]);
                 selectedIngredientId = null;
                 ingredientAmount = null;
             }
         }
     }
 
-    // REMOVE INGREDIENT FROM LIST
+    // REMOVE INGREDIENT
     function removeIngredient(id: number) {
-        selectedIngredients = selectedIngredients.filter(ing => ing.id !== id);
+        selectedIngredients.update(ingredients => ingredients.filter(ing => ing.id !== id));
     }
+
+    async function handleCreateRecipe(event: SubmitEvent) {
+        event.preventDefault();
+
+        let categories;
+        let ingredients;
+        selectedCategories.subscribe(value => (categories = value))();
+        selectedIngredients.subscribe(value => (ingredients = value))();
+
+        // VALIDATION
+        const validationResult = recipeSchema.safeParse({ name, description, difficulty, imageFile, selectedCategories: categories, selectedIngredients: ingredients });
+        if (!validationResult.success) {
+            alert(validationResult.error.errors.map(err => err.message).join('\n'));
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('description', description);
+        formData.append('difficulty', difficulty);
+        formData.append('image', imageFile as Blob);
+        formData.append('categories', JSON.stringify(categories));
+        formData.append('ingredients', JSON.stringify(ingredients));
+
+        const response = await fetch('/api/createRecipeP/createRecipe', {
+            method: 'POST',
+            body: formData,
+        });
+
+        const responseData = await response.json();
+        if (!responseData.success) {
+            alert(responseData.message);
+            return;
+        }
+
+        await goto('/');
+    }
+
 </script>
 
 <div class="recipe-page">
-
     <div class="recipe-header">
         <h1>Create a New Recipe</h1>
-        {#if data.error?.error}
-            <p class="error-message">{data.error.error}</p>
-        {/if}
     </div>
 
-    <form method="POST" action="?/createRecipe" enctype="multipart/form-data">
-
+    <form onsubmit={handleCreateRecipe}>
         <div class="recipe-input-group">
             <label for="name">Recipe Name</label>
-            <input id="name" name="name" type="text" placeholder="Enter recipe name" required />
+            <input id="name" name="name" type="text" bind:value={name} placeholder="Enter recipe name" required />
         </div>
 
         <div class="recipe-input-group">
             <label for="image">Recipe Image</label>
-            <input id="image" name="image" type="file" accept="image/*" required />
+            <input id="image" name="image" type="file" accept="image/*" onchange={handleFileInput} required />
         </div>
 
         <div class="recipe-input-group">
             <label for="description">Description</label>
-            <textarea id="description" name="description" placeholder="Enter description" required></textarea>
+            <textarea id="description" name="description" bind:value={description} placeholder="Enter description" required></textarea>
         </div>
 
         <div class="recipe-input-group">
             <label for="difficulty">Difficulty</label>
-            <select id="difficulty" name="difficulty" required>
+            <select id="difficulty" name="difficulty" bind:value={difficulty} required>
                 <option value="" disabled selected>Select difficulty</option>
                 <option value="Easy">Easy</option>
                 <option value="Medium">Medium</option>
@@ -70,27 +139,19 @@
         </div>
 
         <div class="recipe-input-group">
-            <label for="category">Select Categories</label>
+            <label>Select Categories</label>
             <div class="category-list">
                 {#each data.categories as category}
-                    <label class="category-option" for={`category-${category.id}`} title={category.name}>
-                        <input
-                                type="checkbox"
-                                id={`category-${category.id}`}
-                                name="categories[]"
-                                value={category.id}
-                                bind:group={selectedCategories}
-                        />
+                    <label class="category-option">
+                        <input type="checkbox" value={category.id} bind:group={$selectedCategories} />
                         {category.name}
                     </label>
-                {:else}
-                    <p class="error-message">No categories available</p>
                 {/each}
             </div>
         </div>
 
         <div class="recipe-input-group">
-            <label for="ingredients">Add Ingredients</label>
+            <label>Add Ingredients</label>
             <div class="ingredient-selection">
                 <select bind:value={selectedIngredientId}>
                     <option value="" disabled selected>Select Ingredient</option>
@@ -103,14 +164,8 @@
             </div>
         </div>
 
-        <input type="hidden" name="ingredients" value={JSON.stringify(selectedIngredients)} />
-
-        {#each selectedCategories as category}
-            <input type="hidden" name="selectedCategories[]" value={category} />
-        {/each}
-
         <div class="ingredient-list">
-            {#each selectedIngredients as ingredient}
+            {#each $selectedIngredients as ingredient}
                 <div class="ingredient-item">
                     <span class="ingredient-text">{ingredient.name} - {ingredient.amount} {ingredient.units}</span>
                     <button type="button" class="remove-ingredient-btn" onclick={() => removeIngredient(ingredient.id)}>
@@ -120,15 +175,11 @@
             {/each}
         </div>
 
-
         <div class="recipe-actions">
             <button type="submit">Create Recipe</button>
         </div>
-
     </form>
-
 </div>
-
 
 <style>
     @import '/pallete.css';
