@@ -1,51 +1,45 @@
 <script lang="ts">
     import { z } from 'zod';
     import {goto} from "$app/navigation";
-
-    const loginSchema = z.object({
-        email: z.string().email('Please enter a valid email address.'),
-        password: z.string().min(6, 'Password must be at least 6 characters long.'),
-    });
-
-    export let error: string | null = null;
+    import {writable} from "svelte/store";
 
     let email = '';
     let password = '';
-    let clientError: string | null = null;
+    let clientError = writable<string | null>(null);
+
+    const loginSchema = z.object({
+        email: z.string().email('Please enter a valid email address.').max(50, 'Email too long.'),
+        password: z.string().min(6, 'Password must be at least 6 characters long.').max(50, 'Password can be maximum of 50 characters long.'),
+    });
 
     async function handleLogin(event: SubmitEvent) {
         event.preventDefault();
 
+        clientError.set(null);
+
         const validationResult = loginSchema.safeParse({ email, password });
         if (!validationResult.success) {
-            clientError = validationResult.error.errors.map(err => err.message).join(', ');
+            clientError.set(validationResult.error.errors.map(err => err.message).join(', '));
             return;
         }
-
-        clientError = null;
 
         const formData = new FormData();
         formData.append('email', email);
         formData.append('password', password);
 
-        try {
-            const response = await fetch('?/login', {
-                method: 'POST',
-                body: formData,
-            });
+        const response = await fetch('/api/loginP/login', {
+            method: 'POST',
+            body: formData,
+        });
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                clientError = 'Wrong user login information';
-                return;
-            }
-
-            await goto('/');
-            location.reload();
-        } catch (err) {
-            clientError = 'An unexpected error occurred';
+        const responseData = await response.json();
+        if (!responseData.success) {
+            clientError.set(responseData.message);
+            return;
         }
+
+        await goto('/');
+        location.reload();
     }
 </script>
 
@@ -53,12 +47,8 @@
     <div class="login_container">
         <div class="login_container_box">
             <h1>Login</h1>
-            {#if clientError}
-                <p class="error-message">{clientError}</p>
-            {/if}
-
-            {#if error}
-                <p class="error-message">{error}</p>
+            {#if $clientError}
+                <p class="error-message">{$clientError}</p>
             {/if}
         </div>
 

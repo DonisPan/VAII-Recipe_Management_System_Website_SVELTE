@@ -1,14 +1,25 @@
-<script lang="ts" context="module">
-    import type { LayoutData } from './$types';
-</script>
-
 <script lang="ts">
+    import type { LayoutData } from './$types';
+
     export let data: LayoutData;
     let { user } = data;
 
     // CHECK ROLE
     function checkRole(): boolean {
         return user.role == 'cook' || user.role == 'superadmin';
+    }
+
+    async function logout(): Promise<void> {
+        const response = await fetch('/api/loginP/logout', {
+            method: 'POST',
+            body: new URLSearchParams({ action: 'logout' }),
+        });
+
+        const responseData = await response.json();
+        if (!responseData.success) {
+            return;
+        }
+        location.reload();
     }
 </script>
 
@@ -21,7 +32,6 @@
 
             <ul>
                 <li> <a href="/">Home</a> </li>
-                <li> <a href="/categoriesP">Categories</a> </li>
 
                 {#if checkRole()}
                     <li> <a href="/createRecipeP">Create Recipe</a> </li>
@@ -42,9 +52,7 @@
                     <li> <a href="/loginP">Sign in</a> </li>
                     <li> <a href="/registerP" >Sign up</a> </li>
                 {:else}
-                    <form method="POST" action="/loginP?/logout">
-                        <button type="submit" >Logout</button>
-                    </form>
+                    <button type="submit" onclick={logout}>Logout</button>
 
                     <li>
                         <div class="center">
