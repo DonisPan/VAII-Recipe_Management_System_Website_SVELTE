@@ -4,11 +4,6 @@
     export let data: LayoutData;
     let { user } = data;
 
-    // CHECK ROLE
-    function checkRole(): boolean {
-        return user.role == 'cook' || user.role == 'superadmin';
-    }
-
     async function logout(): Promise<void> {
         const response = await fetch('/api/loginP/logout', {
             method: 'POST',
@@ -33,7 +28,7 @@
             <ul>
                 <li> <a href="/">Home</a> </li>
 
-                {#if checkRole()}
+                {#if user.role && user.role !== 'regular'}
                     <li> <a href="/createRecipeP">Create Recipe</a> </li>
                 {/if}
 

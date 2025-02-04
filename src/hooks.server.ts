@@ -6,45 +6,32 @@ export const handle: Handle = async ({ event, resolve }) => {
     const cookies = cookie.parse(event.request.headers.get('cookie') || '');
     const accessToken = cookies['sb-access-token'];
 
+    event.locals.currentUser = null;
+    event.locals.currentRole = null;
+    event.locals.currentName = null;
+
     if (accessToken) {
-        try {
-            const { data: user, error } = await supabase.auth.getUser(accessToken);
+        const { data: userData, error: userError } = await supabase.auth.getUser(accessToken);
+        if (userError) {
+            console.error(userError.message);
+        }
 
-            if (error) {
-                console.error('Error fetching user:', error.message);
-                event.locals.currentUser = null;
-                event.locals.currentRole = null;
-                event.locals.currentName = null;
-            } else if (user?.user) {
-
-                const { data: profile, error: profileError } = await supabase
-                    .from('ck_person')
-                    .select('id, role, name')
-                    .eq('id', user.user.id)
-                    .single();
-
-                if (profileError) {
-                    console.error('Error fetching profile:', profileError.message);
-                    event.locals.currentUser = null;
-                    event.locals.currentRole = null;
-                    event.locals.currentName = null;
-                } else {
-                    event.locals.currentUser = profile.id;
-                    event.locals.currentRole = profile.role;
-                    event.locals.currentName = profile.name;
-                }
+        if (userData.user) {
+            const { data: profile, error: profileError } = await supabase
+                .from('ck_person')
+                .select('id, role, name')
+                .eq('id', userData.user.id)
+                .single();
+            if (profileError) {
+                console.error(profileError.message);
+            } else {
+                event.locals.currentUser = profile.id;
+                event.locals.currentRole = profile.role;
+                event.locals.currentName = profile.name;
             }
-        } catch (err) {
-            console.error('Unexpected error during user fetch:', err);
-            event.locals.currentUser = null;
-            event.locals.currentRole = null;
-            event.locals.currentName = null;
         }
     } else {
         console.log('No access token found.');
-        event.locals.currentUser = null;
-        event.locals.currentRole = null;
-        event.locals.currentName = null;
     }
 
     return resolve(event);
