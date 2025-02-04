@@ -100,13 +100,13 @@
         }
     }
 
-    @media (max-width: 800px) {
+    @media (max-width: 815px) {
         .page-content {
             grid-template-columns: repeat(2, 1fr);
         }
     }
 
-    @media (max-width: 400px) {
+    @media (max-width: 545px) {
         .page-content {
             grid-template-columns: 1fr;
         }
