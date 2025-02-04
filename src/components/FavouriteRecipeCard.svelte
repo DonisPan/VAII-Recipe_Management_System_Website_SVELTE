@@ -7,7 +7,7 @@
     export let difficulty: string;
     export let liked_at: string;
 
-    // FORMAT THE TIMESTAMP FROM SUPABASE
+    // PARSE TIMESTAMP FROM SUPABASE
     function formatDate(dateString: string) {
         const date = new Date(dateString);
         return date.toLocaleString();
@@ -19,16 +19,14 @@
 
     // REMOVE FROM FAVOURITES
     async function removeFromFavorites() {
-        const response = await fetch(`/recipeP/${id}?/unFavouriteRecipe`, {
+        const response = await fetch(`/api/recipeP/${id}/unfavouriteRecipe`, {
             method: 'POST',
             body: new URLSearchParams({ action: 'unFavouriteRecipe' }),
         });
 
-        if (response.ok) {
-            console.log(`Recipe ${id} removed from favorites`);
-        } else {
-            console.error('Failed to remove favorite');
-        }
+        const responseData = await response.json();
+        alert(responseData.message);
+        location.reload();
     }
 </script>
 

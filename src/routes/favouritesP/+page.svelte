@@ -2,14 +2,8 @@
     import {onMount} from "svelte";
     import ScrollToTopButton from "../../components/ScrollToTopButton.svelte";
     import FavouriteRecipeCard from "../../components/FavouriteRecipeCard.svelte";
-    export let data: {
-        recipes: {
-            id: bigint,
-            name: string,
-            image: string,
-            difficulty: string,
-            liked_at: string,
-        }[] };
+    import {writable} from "svelte/store";
+    export let data: { recipes: { id: bigint, name: string, image: string, difficulty: string, liked_at: string, }[] };
 
     let scrollToTopVisible = false;
 
@@ -21,11 +15,17 @@
         window.addEventListener('scroll', handleScroll);
     });
 
+    let filteredRecipes = writable(data.recipes);
     let searchQuery = '';
-    $: filteredRecipes = data.recipes.filter(recipe =>
-        recipe.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        recipe.difficulty.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+
+    function handleSearch() {
+        filteredRecipes.set(
+            data.recipes.filter(recipe =>
+                recipe.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                recipe.difficulty.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+        );
+    }
 </script>
 
 {#if scrollToTopVisible}
@@ -33,16 +33,12 @@
 {/if}
 
 <div class="search-container">
-    <input
-            type="text"
-            placeholder="Search recipes by name..."
-            bind:value={searchQuery}
+    <input type="text" placeholder="Search recipes..." bind:value={searchQuery} oninput={handleSearch} />
 
-    />
 </div>
 
 <div class="page-content">
-    {#each filteredRecipes as recipe}
+    {#each $filteredRecipes as recipe}
         <FavouriteRecipeCard
                 id={recipe.id}
                 name={recipe.name}
