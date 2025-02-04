@@ -1,16 +1,14 @@
 <script lang="ts">
     import { z } from 'zod';
     import {goto} from "$app/navigation";
-
-    export let error: string | null = null;
-    export let success: boolean = false;
+    import {writable} from "svelte/store";
 
     let name = '';
     let surname = '';
     let email = '';
     let password = '';
     let gender = '';
-    let clientError: string | null = null;
+    let clientError = writable<string | null>(null);
 
     const signUpSchema = z.object({
         name: z.string().min(1, 'Name is required.'),
@@ -23,13 +21,13 @@
     async function handleSignUp(event: SubmitEvent) {
         event.preventDefault();
 
+        clientError.set(null);
+
         const validationResult = signUpSchema.safeParse({ name, surname, email, password, gender });
         if (!validationResult.success) {
-            clientError = validationResult.error.errors.map(err => err.message).join(', ');
+            clientError.set(validationResult.error.errors.map(err => err.message).join(', '));
             return;
         }
-
-        clientError = null;
 
         const formData = new FormData();
         formData.append('name', name);
@@ -38,24 +36,20 @@
         formData.append('password', password);
         formData.append('gender', gender);
 
-        try {
-            const response = await fetch('?/register', {
-                method: 'POST',
-                body: formData,
-            });
+        const response = await fetch('/api/registerP/register', {
+            method: 'POST',
+            body: formData,
+        });
 
-            const result = await response.json();
+        const responseData = await response.json();
+        clientError.set(responseData.message);
 
-            if (!response.ok) {
-                clientError = 'Registration failed. Email might already be in use.';
-                return;
-            }
-
-            success = true;
-            await goto('/loginP');
-        } catch (err) {
-            clientError = 'An unexpected error occurred';
+        if (!responseData.success) {
+            return;
         }
+
+        await new Promise(resolve => setTimeout(resolve, 1000)); // SLEEP FOR 1 SECOND
+        await goto('/loginP');
     }
 </script>
 
@@ -63,14 +57,8 @@
     <form on:submit={handleSignUp}>
         <div class="register_container_box">
             <h1>Register</h1>
-            {#if clientError}
-                <p class="error-message">{clientError}</p>
-            {/if}
-            {#if error}
-                <p class="error-message">{error}</p>
-            {/if}
-            {#if success}
-                <p class="success-message">Sign up successful! You can now log in.</p>
+            {#if $clientError}
+                <p class="error-message">{$clientError}</p>
             {/if}
         </div>
 
@@ -141,17 +129,6 @@
         padding: 8px;
         background-color: #fef2f2;
         border: 1px solid #fee2e2;
-        border-radius: 8px;
-    }
-
-    .success-message {
-        color: #059669;
-        font-size: 14px;
-        text-align: center;
-        margin: 10px 0;
-        padding: 8px;
-        background-color: #ecfdf5;
-        border: 1px solid #a7f3d0;
         border-radius: 8px;
     }
 
