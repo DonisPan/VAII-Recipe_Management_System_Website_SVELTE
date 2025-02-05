@@ -1,11 +1,6 @@
 import {json} from "@sveltejs/kit";
 import {supabase} from "$lib/supabase";
-import {z} from "zod";
-
-const loginSchema = z.object({
-    email: z.string().email('Please enter a valid email address.').max(50, 'Email too long.'),
-    password: z.string().min(6, 'Password must be at least 6 characters long.').max(50, 'Password can be maximum of 50 characters long.'),
-});
+import {loginSchema} from "$lib/zodSchemas";
 
 export async function POST({ request, cookies }) {
     const formData = await request.formData();

@@ -1,14 +1,7 @@
-import {z} from "zod";
 import {json} from "@sveltejs/kit";
 import {supabase} from "$lib/supabase";
+import {signUpSchema} from "$lib/zodSchemas";
 
-const signUpSchema = z.object({
-    name: z.string().min(1, 'Name is required.').max(50, 'Name can be maximum of 50 characters.'),
-    surname: z.string().min(1, 'Surname is required.').max(50, 'Surname can be maximum of 50 characters.'),
-    email: z.string().email('Please enter a valid email address.').max(50, 'Email too long.'),
-    password: z.string().min(6, 'Password must be at least 6 characters long.').max(50, 'Password can be maximum of 50 characters long.'),
-    gender: z.enum(['Male', 'Female', 'Other'], { invalid_type_error: 'Gender is required.' }),
-});
 
 export async function POST({ request }) {
     const formData = await request.formData();

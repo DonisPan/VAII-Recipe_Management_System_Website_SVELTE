@@ -1,5 +1,7 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
+    import {updateSchema} from "$lib/zodSchemas";
+
     export let data: { recipe: any, id: any, currentUser: any, currentRole: any, isFavourite: boolean, };
     const currentUser = data.currentUser;
     const currentRole = data.currentRole;
@@ -72,6 +74,16 @@
         event.preventDefault();
 
         const formData = new FormData(event.target as HTMLFormElement);
+        const name = formData.get("name") as string;
+        const description = formData.get("description") as string;
+        const difficulty = formData.get("difficulty") as string;
+
+        const validationResult = updateSchema.safeParse({ name, description, difficulty });
+        if (!validationResult.success) {
+            alert(validationResult.error.errors.map(err => err.message).join('\n'));
+            return;
+        }
+
         const response = await fetch(`/api/recipeP/${id}/updateRecipe`, {
             method: 'POST',
             body: formData,

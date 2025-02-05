@@ -1,28 +1,6 @@
 import {json} from "@sveltejs/kit";
 import {supabase} from "$lib/supabase";
-import {z} from "zod";
-
-const recipeSchema = z.object({
-    name: z.string().min(4, 'Recipe name is required.').max(60, 'Recipe name is too long'),
-    description: z.string().min(1, 'Description is required.').max(300, 'Try to keep the description shorter'),
-    difficulty: z.enum(['Easy', 'Medium', 'Hard', 'Insane'], { invalid_type_error: 'Difficulty is required.' }),
-    imageFile: z.instanceof(File, { message: 'Image file is required' }),
-    selectedCategories: z.array(z.number()).min(1, 'At least one category is required.'),
-    selectedIngredients: z.array(
-        z.object({
-            id: z.number(),
-            name: z.string(),
-            amount: z.number().positive('Amount must be greater than 0'),
-            units: z.string(),
-        })
-    ).min(1, 'At least one ingredient is required.'),
-    stepList: z.array(
-        z.object({
-            index: z.number(),
-            description: z.string().min(5, 'Step description must be at least 5 characters.'),
-        })
-    ).min(1, 'At least one step is required.'),
-});
+import {recipeSchema} from "$lib/zodSchemas";
 
 export async function POST({ request, locals }) {
     const formData = await request.formData();
@@ -42,15 +20,16 @@ export async function POST({ request, locals }) {
     selectedIngredients = JSON.parse(ingredientsJson);
 
     const stepsJson = formData.get('steps') as string;
-    let steps: { index: any; description: any }[];
-    steps = JSON.parse(stepsJson);
+    let stepList: { index: any; description: any }[];
+    stepList = JSON.parse(stepsJson);
 
     // VALIDATION
-    const validationResult = recipeSchema.safeParse({ name, description, difficulty, imageFile, selectedCategories, selectedIngredients, steps });
+    const validationResult = recipeSchema.safeParse({ name, description, difficulty, imageFile, selectedCategories, selectedIngredients, stepList });
     if (!validationResult.success) {
         console.error('Validation failed.');
+        console.error(validationResult);
         console.groupEnd();
-        return json({ success: false, message: validationResult.error.errors.map((err) => err.message).join(', ') });
+        return json({ success: false, message: validationResult.error.errors.map(err => err.message).join('\n') });
     }
 
     // IF NEW IMAGE
@@ -118,8 +97,8 @@ export async function POST({ request, locals }) {
     }
 
     // INSERT STEPS
-    if (steps.length > 0) {
-        const stepsInsertData = steps.map((step) => ({
+    if (stepList.length > 0) {
+        const stepsInsertData = stepList.map((step) => ({
             recipe_id: recipeData.id,
             index: step.index,
             description: step.description,

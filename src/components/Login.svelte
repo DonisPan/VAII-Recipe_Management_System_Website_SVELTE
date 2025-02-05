@@ -1,16 +1,11 @@
 <script lang="ts">
-    import { z } from 'zod';
     import {goto} from "$app/navigation";
     import {writable} from "svelte/store";
+    import {loginSchema} from "$lib/zodSchemas";
 
     let email = '';
     let password = '';
     let clientError = writable<string | null>(null);
-
-    const loginSchema = z.object({
-        email: z.string().email('Please enter a valid email address.').max(50, 'Email too long.'),
-        password: z.string().min(6, 'Password must be at least 6 characters long.').max(50, 'Password can be maximum of 50 characters long.'),
-    });
 
     async function handleLogin(event: SubmitEvent) {
         event.preventDefault();

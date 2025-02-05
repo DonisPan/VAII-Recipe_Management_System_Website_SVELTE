@@ -1,7 +1,7 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
     import { writable } from 'svelte/store';
-    import { z } from 'zod';
+    import {recipeSchema} from "$lib/zodSchemas";
 
     export let data: {
         categories: { id: number; name: string }[];
@@ -18,28 +18,6 @@
     let selectedIngredientId: number | null = null;
     let ingredientAmount: number | null = null;
     let newStep: string = '';
-
-    const recipeSchema = z.object({
-        name: z.string().min(4, 'Recipe name is required.').max(60, 'Recipe name is too long'),
-        description: z.string().min(1, 'Description is required.').max(300, 'Try to keep the description shorter'),
-        difficulty: z.enum(['Easy', 'Medium', 'Hard', 'Insane'], { invalid_type_error: 'Difficulty is required.' }),
-        imageFile: z.instanceof(File, { message: 'Image file is required' }),
-        selectedCategories: z.array(z.number()).min(1, 'At least one category is required.'),
-        selectedIngredients: z.array(
-            z.object({
-                id: z.number(),
-                name: z.string(),
-                amount: z.number().positive('Amount must be greater than 0'),
-                units: z.string(),
-            })
-        ).min(1, 'At least one ingredient is required.'),
-        stepList: z.array(
-            z.object({
-                index: z.number(),
-                description: z.string().min(5, 'Step description must be at least 5 characters.'),
-            })
-        ).min(1, 'At least one step is required.'),
-    });
 
     // INPUT IMAGE HANDLING
     let imageFile: File | null = null;
