@@ -1,7 +1,13 @@
 import { supabase } from '$lib/supabase';
 import type {PageServerLoad} from './$types';
+import {goto} from "$app/navigation";
 
-export const load: PageServerLoad = async (): Promise<any> => {
+export const load: PageServerLoad = async ({locals}): Promise<any> => {
+    let currentUser = locals.currentUser;
+
+    if (!currentUser) {
+        await goto('/');
+    }
 
     console.group('Load Create Recipe Page Data');
 

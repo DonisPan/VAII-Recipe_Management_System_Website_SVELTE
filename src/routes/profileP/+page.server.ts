@@ -1,10 +1,15 @@
 import type {PageServerLoad} from "../../../.svelte-kit/types/src/routes/$types";
 import {supabase} from "$lib/supabase";
 import {fail} from "@sveltejs/kit";
+import {goto} from "$app/navigation";
 
 export const load: PageServerLoad = async ({locals}): Promise<any> => {
     let currentUser = locals.currentUser;
     let currentRole = locals.currentRole;
+
+    if (!currentUser) {
+        await goto('/');
+    }
 
     console.group('Load Profile Page')
 

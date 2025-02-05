@@ -1,8 +1,15 @@
 import {json} from "@sveltejs/kit";
 import {supabase} from "$lib/supabase";
 import {recipeSchema} from "$lib/zodSchemas";
+import {goto} from "$app/navigation";
 
 export async function POST({ request, locals }) {
+    let currentUser = locals.currentUser;
+
+    if (!currentUser) {
+        await goto('/');
+    }
+
     const formData = await request.formData();
     const name = formData.get('name') as string;
     const description = formData.get('description') as string;
@@ -47,7 +54,6 @@ export async function POST({ request, locals }) {
     }
 
     // INSERT RECIPE
-    let currentUser = locals.currentUser;
     const { data: recipeData, error: recipeError } = await supabase.from('ck_recipe').insert({
         name,
         user_id: currentUser,

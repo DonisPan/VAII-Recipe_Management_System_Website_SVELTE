@@ -4,6 +4,12 @@ import {supabase} from "$lib/supabase";
 export async function POST({ request, locals }) {
     let currentRole = locals.currentRole;
 
+    // CURRENT USER ROLE DOES NOT HAVE PERMISSIONS
+    if (currentRole !== 'superadmin') {
+        console.error('No permissions for this action.');
+        return json({ success: false, message: 'You do not have permissions for this action.' });
+    }
+
     const formData = await request.formData();
     const userId = formData.get('user_id') as string;
 
@@ -16,12 +22,6 @@ export async function POST({ request, locals }) {
     }
 
     console.info('User ID: ', userId);
-
-    // CURRENT USER ROLE DOES NOT HAVE PERMISSIONS
-    if (currentRole !== 'superadmin') {
-        console.error('No permissions for this action.');
-        return json({ success: false, message: 'You do not have permissions for this action.' });
-    }
 
     // UPDATE USER ROLE TO COOK
     const { error: updateError } = await supabase

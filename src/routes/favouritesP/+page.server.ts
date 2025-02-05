@@ -1,8 +1,13 @@
 import { supabase } from '$lib/supabase';
 import type {PageServerLoad} from "../../../.svelte-kit/types/src/routes/$types";
+import {goto} from "$app/navigation";
 
 export const load: PageServerLoad = async ({locals}): Promise<any> => {
     const currentUser = locals.currentUser;
+
+    if (!currentUser) {
+        await goto('/');
+    }
 
     console.group('Load Favourites Page');
 

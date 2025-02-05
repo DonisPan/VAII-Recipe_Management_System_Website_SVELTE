@@ -35,11 +35,11 @@ export async function POST({ request, cookies }) {
 
     // SET COOKIE
     cookies.set('sb-access-token', loginData.session?.access_token || '', {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
+        httpOnly: true, // PREVENTS JavaScript ACCESS TO TOKEN
+        secure: true, // TOKEN IS SENT ONLY VIA HTTPS
+        sameSite: 'strict', // PREVENTS CRSF(Cross-Site Request Forgery)
         maxAge: 60 * 60 * 24 * 7, // 7 DAYS
-        path: '/',
+        path: '/', // ALL FILES IN THIS DIRECTORIES WILL HAVE ACCESS
     });
 
     console.log('Cookie set.');
