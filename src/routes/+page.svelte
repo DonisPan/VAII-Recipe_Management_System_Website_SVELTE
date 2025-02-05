@@ -2,7 +2,7 @@
     import RecipeCard from "../components/RecipeCard.svelte";
     import ScrollToTopButton from "../components/ScrollToTopButton.svelte";
     import {onMount} from "svelte";
-    export let data: { recipes: { id: bigint, name: string, image: string, difficulty: string }[] };
+    export let data: { recipes: { id: bigint, name: string, image: string, difficulty: string, categories: any[] }[] };
 
     let scrollToTopVisible = false;
 
@@ -21,7 +21,8 @@
         const query = searchQuery.toLowerCase();
         filteredRecipes = data.recipes.filter((recipe) =>
             recipe.name.toLowerCase().includes(query) ||
-            recipe.difficulty.toLowerCase().includes(query)
+            recipe.difficulty.toLowerCase().includes(query) ||
+            recipe.categories.some(category => category.toLowerCase().includes(query))
         );
     }
 </script>

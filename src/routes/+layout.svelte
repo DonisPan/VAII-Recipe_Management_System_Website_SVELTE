@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { LayoutData } from './$types';
+    import {goto} from "$app/navigation";
 
     export let data: LayoutData;
     let { user } = data;
@@ -14,6 +15,7 @@
         if (!responseData.success) {
             return;
         }
+        await goto('/');
         location.reload();
     }
 </script>

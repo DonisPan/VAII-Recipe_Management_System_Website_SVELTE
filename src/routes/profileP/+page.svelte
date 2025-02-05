@@ -23,9 +23,7 @@
             body: new URLSearchParams({ action: 'requestCookRole' }),
         });
         const responseData = await response.json();
-        if (!responseData.success) {
-            alert(responseData.message);
-        }
+        alert(responseData.message);
     }
 
     // ACCEPT PROMOTION REQUEST

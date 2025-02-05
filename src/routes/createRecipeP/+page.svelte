@@ -13,9 +13,11 @@
     let difficulty = '';
     let selectedCategories = writable<number[]>([]);
     let selectedIngredients = writable<{ id: number; name: string; amount: number; units: string }[]>([]);
+    let stepList = writable<{ index: number, description: string }[]>([]);
 
     let selectedIngredientId: number | null = null;
     let ingredientAmount: number | null = null;
+    let newStep: string = '';
 
     const recipeSchema = z.object({
         name: z.string().min(4, 'Recipe name is required.').max(60, 'Recipe name is too long'),
@@ -31,6 +33,12 @@
                 units: z.string(),
             })
         ).min(1, 'At least one ingredient is required.'),
+        stepList: z.array(
+            z.object({
+                index: z.number(),
+                description: z.string().min(5, 'Step description must be at least 5 characters.'),
+            })
+        ).min(1, 'At least one step is required.'),
     });
 
     // INPUT IMAGE HANDLING
@@ -67,16 +75,38 @@
         selectedIngredients.update(ingredients => ingredients.filter(ing => ing.id !== id));
     }
 
+    // ADD STEP
+    function addStep() {
+        if (newStep.trim() !== '') {
+            stepList.update(existingSteps => [
+                ...existingSteps,
+                { index: existingSteps.length + 1, description: newStep.trim() }
+            ]);
+            newStep = '';
+        }
+    }
+
+    // REMOVE STEP
+    function removeStep(index: number) {
+        stepList.update(existingSteps =>
+            existingSteps
+                .filter(step => step.index !== index)
+                .map((step, i) => ({ index: i + 1, description: step.description }))
+        );
+    }
+
     async function handleCreateRecipe(event: SubmitEvent) {
         event.preventDefault();
 
         let categories;
         let ingredients;
+        let steps;
         selectedCategories.subscribe(value => (categories = value))();
         selectedIngredients.subscribe(value => (ingredients = value))();
+        stepList.subscribe(value => (steps = value))();
 
         // VALIDATION
-        const validationResult = recipeSchema.safeParse({ name, description, difficulty, imageFile, selectedCategories: categories, selectedIngredients: ingredients });
+        const validationResult = recipeSchema.safeParse({ name, description, difficulty, imageFile, selectedCategories: categories, selectedIngredients: ingredients, stepList: steps });
         if (!validationResult.success) {
             alert(validationResult.error.errors.map(err => err.message).join('\n'));
             return;
@@ -89,6 +119,7 @@
         formData.append('image', imageFile as Blob);
         formData.append('categories', JSON.stringify(categories));
         formData.append('ingredients', JSON.stringify(ingredients));
+        formData.append('steps', JSON.stringify(steps));
 
         const response = await fetch('/api/createRecipeP/createRecipe', {
             method: 'POST',
@@ -139,7 +170,7 @@
         </div>
 
         <div class="recipe-input-group">
-            <label>Select Categories</label>
+            <label for="categories">Select Categories</label>
             <div class="category-list">
                 {#each data.categories as category}
                     <label class="category-option">
@@ -151,7 +182,7 @@
         </div>
 
         <div class="recipe-input-group">
-            <label>Add Ingredients</label>
+            <label for="ingredients">Add Ingredients</label>
             <div class="ingredient-selection">
                 <select bind:value={selectedIngredientId}>
                     <option value="" disabled selected>Select Ingredient</option>
@@ -169,6 +200,25 @@
                 <div class="ingredient-item">
                     <span class="ingredient-text">{ingredient.name} - {ingredient.amount} {ingredient.units}</span>
                     <button type="button" class="remove-ingredient-btn" onclick={() => removeIngredient(ingredient.id)}>
+                        ✖
+                    </button>
+                </div>
+            {/each}
+        </div>
+
+        <div class="recipe-input-group">
+            <label for="steps">Add Steps</label>
+            <div class="step-selection">
+                <input type="text" id="steps" bind:value={newStep} placeholder="Enter step instructions" />
+                <button type="button" class="add-step-btn" onclick={addStep}>Add</button>
+            </div>
+        </div>
+
+        <div class="step-list">
+            {#each $stepList as step}
+                <div class="step-item">
+                    <span class="step-text">{step.index}. {step.description}</span>
+                    <button type="button" class="remove-step-btn" onclick={() => removeStep(step.index)}>
                         ✖
                     </button>
                 </div>
@@ -378,6 +428,77 @@
     }
     .ingredient-list::-webkit-scrollbar-track {
         background: var(--light-dun);
+    }
+
+    .step-selection {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .step-list {
+        margin-top: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        max-height: 180px;
+        overflow-y: auto;
+        border: 1px solid var(--tekhelet);
+        padding: 12px;
+        border-radius: 12px;
+        background-color: var(--light-dun);
+    }
+
+    .step-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 12px;
+        border-radius: 8px;
+        background-color: white;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+
+    .step-item:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    .step-text {
+        flex: 1;
+        color: var(--tekhelet);
+        text-align: left;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .remove-step-btn {
+        background-color: var(--delete-button);
+        color: white;
+        font-size: 1rem;
+        font-weight: bold;
+        padding: 6px 10px;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+        min-width: 32px;
+        min-height: 32px;
+    }
+
+    .remove-step-btn:hover {
+        background-color: #bf2116;
+        transform: scale(1.1);
+    }
+
+    .remove-step-btn:active {
+        background-color: #d52519;
+        transform: scale(1);
     }
 
     button {

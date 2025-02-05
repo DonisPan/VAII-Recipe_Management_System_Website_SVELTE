@@ -88,29 +88,23 @@
 </script>
 
 {#if !isEditing}
-
     <div class="recipe-page">
         {#if recipe}
-
             <!--HEADER-->
             <div class="recipe-header">
                 <h1>{recipe.name}</h1>
-
                 <!--SHOW FAVOURITE BUTTON ONLY IF USER IS LOGGED IN-->
                 {#if currentRole !== null}
                 <button class="favorite-btn"
                         onclick={toggleFavorite}
-                        aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                >
+                        aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}>
                     <svg class={isFavorite ? 'active' : ''}
                          viewBox="0 0 24 24"
-                         xmlns="http://www.w3.org/2000/svg"
-                    >
+                         xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                     </svg>
                 </button>
                 {/if}
-
                 <!--CATEGORIES-->
                 <h3 class="recipe-categories">
                     {#each recipe.categories as category}
@@ -119,7 +113,6 @@
                         </span>
                     {/each}
                 </h3>
-
                 <!--AUTHOR-->
                 <h3>Author: {recipe.author}</h3>
                 <!--DIFFICULTY-->
@@ -127,13 +120,11 @@
                 <!--IMAGE-->
                 <img src={recipe.image} alt="recipe_image" />
             </div>
-
             <!--DESCRIPTION-->
             <div class="recipe-description">
                 <h2>Recipe Description</h2>
                 <p>{recipe.description}</p>
             </div>
-
             <!--INGREDIENTS-->
             <div class="recipe-ingredients">
                 <h2>Recipe Ingredients</h2>
@@ -144,15 +135,19 @@
                         </div>
                     {/each}
                 </div>
-                <p></p>
             </div>
-
             <!--STEPS-->
             <div class="recipe-steps">
                 <h2>Recipe Steps</h2>
-                <p></p>
+                <div class="steps-list">
+                    {#each recipe.steps as step}
+                        <div class="step-item">
+                            <span class="step-index">{step.index}.</span>
+                            <span class="step-text">{step.description}</span>
+                        </div>
+                    {/each}
+                </div>
             </div>
-
             <!--SHOW THE DELETE/EDIT BUTTONS ONLY IF THE USER IS THE OWNER OR SUPERADMIN-->
             {#if currentUser === recipe.user_id || currentRole === 'superadmin'}
                 <div class="buttons">
@@ -172,85 +167,46 @@
     </div>
 
 {:else if isEditing}
-
     <div class="recipe-page">
-
         {#if recipe}
-
+            <!--UPDATE RECIPE-->
             <form onsubmit={updateRecipe}>
-
-                <div class="recipe-header">
+                <div class="recipe-input-group">
                     <label for="name">Recipe Name</label>
+                    <input id="name" name="name" type="text" bind:value={recipe.name} placeholder="Enter recipe name" required />
+                </div>
 
-                    <input
-                        id="name"
-                        type="text"
-                        name="name"
-                        bind:value={recipe.name}
-                        placeholder="Enter recipe name"
-                        required />
-
-                    <label for="difficulty">Difficulty:</label>
-                    <select
-                        id="difficulty"
-                        name="difficulty"
-                        bind:value={recipe.difficulty}>
-
+                <div class="recipe-input-group">
+                    <label for="difficulty">Difficulty</label>
+                    <select id="difficulty" name="difficulty" bind:value={recipe.difficulty} required>
                         <option value="Easy">Easy</option>
                         <option value="Medium">Medium</option>
                         <option value="Hard">Hard</option>
                         <option value="Insane">Insane</option>
                     </select>
-
-                    <div class="image-input-wrapper">
-                        <label for="image">Recipe Image</label>
-                        <input
-                            id="image"
-                            type="file"
-                            name="image"
-                            accept="image/*"
-                            onchange={handleFileInput}
-                        />
-                    </div>
                 </div>
 
-                <div class="recipe-description">
-                    <label for="description">Recipe Description</label>
+                <div class="recipe-input-group">
+                    <label for="image">Recipe Image</label>
+                    <input id="image" name="image" type="file" accept="image/*" onchange={handleFileInput} />
+                </div>
 
-                    <textarea
-                        id="description"
-                        name="description"
-                        bind:value={recipe.description}
-                        placeholder="Enter recipe description"
-                        required>
-                    </textarea>
+                <div class="recipe-input-group">
+                    <label for="description">Recipe Description</label>
+                    <textarea id="description" name="description" bind:value={recipe.description} placeholder="Enter recipe description" required></textarea>
                 </div>
 
                 <div class="buttons">
-
                     <div class="delete-button">
-                        <button
-                            type="button"
-                            onclick={editRecipe}
-                            class="btn-cancel">
-                            CANCEL
-                        </button>
+                        <button type="button" onclick={editRecipe} class="btn-cancel">CANCEL</button>
                     </div>
-
                     <div class="edit-button">
-                        <button type="submit" class="btn-save">
-                            SAVE
-                        </button>
+                        <button type="submit" class="btn-save">SAVE</button>
                     </div>
-
                 </div>
-
             </form>
-
         {/if}
-
     </div>
-
 {/if}
 
 
@@ -258,17 +214,18 @@
 <style>
     @import '/pallete.css';
 
+    /* GENERAL STYLES */
     .recipe-page {
         max-width: 850px;
         margin: 2rem auto;
         padding: 2rem;
         border-radius: 20px;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        background-color: var(--light-dun);
     }
 
     /* HEADER */
     .recipe-header {
-        position: relative;
         text-align: center;
         margin-bottom: 2rem;
     }
@@ -280,7 +237,6 @@
     }
 
     .recipe-header h3 {
-        margin: 1px;
         font-size: 1.4rem;
         font-weight: 300;
         color: var(--mountbatten-pink);
@@ -302,18 +258,7 @@
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
     }
 
-    h2 {
-        font-size: 2rem;
-        color: var(--tekhelet);
-        margin-bottom: 1rem;
-    }
-
-    p {
-        margin: 0;
-        color: var(--ultra-violet);
-        line-height: 1.8;
-    }
-
+    /* SECTION CONTAINERS */
     .recipe-description,
     .recipe-ingredients,
     .recipe-steps {
@@ -324,6 +269,19 @@
         border: 1px solid var(--tekhelet);
         border-left: 6px solid var(--ultra-violet);
         transition: background-color 0.3s ease, border-left-color 0.3s ease;
+    }
+
+    /* TEXT ELEMENTS */
+    h2 {
+        font-size: 2rem;
+        color: var(--tekhelet);
+        margin-bottom: 1rem;
+    }
+
+    p {
+        margin: 0;
+        color: var(--ultra-violet);
+        line-height: 1.8;
     }
 
     /* CATEGORIES */
@@ -371,7 +329,6 @@
 
     /* INGREDIENTS */
     .ingredient-list {
-        margin-top: 10px;
         display: flex;
         flex-direction: column;
         gap: 6px;
@@ -383,9 +340,9 @@
         background-color: var(--light-dun);
     }
 
-    .ingredient-item {
+    .ingredient-item,
+    .step-item {
         display: flex;
-        justify-content: space-between;
         align-items: center;
         padding: 10px 12px;
         border-radius: 8px;
@@ -395,33 +352,40 @@
         transition: background-color 0.2s ease, transform 0.1s ease;
     }
 
-    .ingredient-item:nth-child(even) {
+    .ingredient-item:nth-child(even),
+    .step-item:nth-child(even) {
         background-color: #f9f9f9;
     }
 
-    .ingredient-text {
+    .ingredient-text,
+    .step-text {
         flex: 1;
         color: var(--tekhelet);
         text-align: left;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        line-height: 1.5;
     }
 
-    .ingredient-list::-webkit-scrollbar,
-    .recipe-categories::-webkit-scrollbar {
-        width: 6px;
+    /* STEPS */
+    .steps-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px;
+        border-radius: 12px;
+        background-color: white;
+        max-height: 300px;
+        overflow-y: auto;
     }
 
-    .ingredient-list::-webkit-scrollbar-thumb,
-    .recipe-categories::-webkit-scrollbar-thumb {
-        background: var(--tekhelet);
-        border-radius: 6px;
-    }
-
-    .ingredient-list::-webkit-scrollbar-track,
-    .recipe-categories::-webkit-scrollbar-track {
-        background: var(--light-dun);
+    .step-index {
+        font-weight: bold;
+        font-size: 1.2rem;
+        color: var(--tekhelet);
+        flex-shrink: 0;
+        margin-right: 8px;
     }
 
     /* BUTTONS */
@@ -431,7 +395,6 @@
         align-items: center;
         gap: 1rem;
         margin-top: 1.5rem;
-        margin-bottom: 1.5rem;
     }
 
     .buttons button {
@@ -508,6 +471,69 @@
     .favorite-btn svg.active {
         fill: #FFD700;
         stroke: #FFD700;
+    }
+
+    /* SCROLLBAR STYLING */
+    .ingredient-list::-webkit-scrollbar,
+    .steps-list::-webkit-scrollbar,
+    .recipe-categories::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .ingredient-list::-webkit-scrollbar-thumb,
+    .steps-list::-webkit-scrollbar-thumb,
+    .recipe-categories::-webkit-scrollbar-thumb {
+        background: var(--tekhelet);
+        border-radius: 6px;
+    }
+
+    .ingredient-list::-webkit-scrollbar-track,
+    .steps-list::-webkit-scrollbar-track,
+    .recipe-categories::-webkit-scrollbar-track {
+        background: var(--light-dun);
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .recipe-input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    label {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: var(--tekhelet);
+    }
+
+    input,
+    textarea,
+    select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--tekhelet);
+        border-radius: 10px;
+        font-size: 1rem;
+        background-color: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        transition: box-shadow 0.3s ease;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+        outline: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    textarea {
+        resize: none;
+        height: 140px;
     }
 
     /* RESPONSIVE */

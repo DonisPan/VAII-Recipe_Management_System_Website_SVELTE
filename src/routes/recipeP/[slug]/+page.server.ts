@@ -123,6 +123,19 @@ export const load: PageServerLoad = async ({params, locals}): Promise<any> => {
 
     console.log('Combine ingredients and data.');
 
+    // LOAD RECIPE STEPS
+    const { data: recipeSteps, error: recipeStepsError } = await supabase
+        .from('ck_recipe_steps')
+        .select('index, description')
+        .eq('recipe_id', id);
+    if (recipeStepsError) {
+        console.error(recipeStepsError.message);
+        console.groupEnd();
+        return { recipe: null };
+    }
+
+    console.log('Load recipe steps.');
+
     // CREATE RECIPE FOR CLIENT
     const recipe = {
         user_id: recipeData.user_id,
@@ -133,23 +146,27 @@ export const load: PageServerLoad = async ({params, locals}): Promise<any> => {
         difficulty: recipeData.difficulty || 'Unknown',
         ingredients: ingredients,
         categories: categories,
+        steps: recipeSteps,
     };
 
     console.log('Create recipe.');
 
     // CHECK IF IS FAVOURITE
-    const { data: favouriteData, error: favouriteError } = await supabase
-        .from('ck_user_favourites')
-        .select('recipe_id')
-        .eq('recipe_id', id)
-        .eq('user_id', currentUser)
-        .maybeSingle();
-    if (favouriteError) {
-        console.error(favouriteError.message);
-        console.groupEnd();
-        return { recipe: null };
+    let isFavourite = false;
+    if (currentUser) {
+        const { data: favouriteData, error: favouriteError } = await supabase
+            .from('ck_user_favourites')
+            .select('recipe_id')
+            .eq('recipe_id', id)
+            .eq('user_id', currentUser)
+            .maybeSingle();
+        if (favouriteError) {
+            console.error(favouriteError.message);
+            console.groupEnd();
+            return { recipe: null };
+        }
+        isFavourite = !!favouriteData;
     }
-    let isFavourite = !!favouriteData;
 
     console.log('Recipe page loaded.');
     console.groupEnd();

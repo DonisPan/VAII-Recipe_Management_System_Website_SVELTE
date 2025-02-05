@@ -13,6 +13,7 @@ export const load: PageServerLoad = async ({locals}): Promise<any> => {
         .eq('user_id', currentUser);
     if (favouriteError) {
         console.error(favouriteError.message);
+        console.groupEnd();
         return { recipes: [] };
     }
 
@@ -32,6 +33,7 @@ export const load: PageServerLoad = async ({locals}): Promise<any> => {
         .in('id', recipeIds);
     if (recipeError) {
         console.error(recipeError.message);
+        console.groupEnd();
         return { recipes: [] };
     }
 

@@ -15,6 +15,7 @@ export const load: PageServerLoad = async ({locals}): Promise<any> => {
         .eq('user_id', currentUser);
     if (recipeError) {
         console.error('Error fetching recipes:', recipeError.message);
+        console.groupEnd();
         return { recipes: [] };
     }
 
@@ -47,6 +48,8 @@ export const load: PageServerLoad = async ({locals}): Promise<any> => {
         .eq('id', currentUser)
         .single();
     if (currentUserError) {
+        console.error(currentUserError.message);
+        console.groupEnd();
         return fail(400, { error: currentUserError.message });
     }
 
@@ -71,6 +74,7 @@ export const load: PageServerLoad = async ({locals}): Promise<any> => {
         .in('id', requestUserIds)
     if (userDataError) {
         console.error('Error fetching user data:', userDataError.message);
+        console.groupEnd();
     }
 
     console.log('Requests Loaded.');

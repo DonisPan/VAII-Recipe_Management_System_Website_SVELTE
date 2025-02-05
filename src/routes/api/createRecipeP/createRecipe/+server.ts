@@ -16,6 +16,12 @@ const recipeSchema = z.object({
             units: z.string(),
         })
     ).min(1, 'At least one ingredient is required.'),
+    stepList: z.array(
+        z.object({
+            index: z.number(),
+            description: z.string().min(5, 'Step description must be at least 5 characters.'),
+        })
+    ).min(1, 'At least one step is required.'),
 });
 
 export async function POST({ request, locals }) {
@@ -35,8 +41,12 @@ export async function POST({ request, locals }) {
     let selectedIngredients: { id: any; amount: any; }[];
     selectedIngredients = JSON.parse(ingredientsJson);
 
+    const stepsJson = formData.get('steps') as string;
+    let steps: { index: any; description: any }[];
+    steps = JSON.parse(stepsJson);
+
     // VALIDATION
-    const validationResult = recipeSchema.safeParse({ name, description, difficulty, imageFile, selectedCategories, selectedIngredients });
+    const validationResult = recipeSchema.safeParse({ name, description, difficulty, imageFile, selectedCategories, selectedIngredients, steps });
     if (!validationResult.success) {
         console.error('Validation failed.');
         console.groupEnd();
@@ -102,10 +112,28 @@ export async function POST({ request, locals }) {
         if (ingredientError) {
             console.error(ingredientError.message);
             console.groupEnd();
-            return json({ success: false, error: `Failed to associate ingredients: ${ingredientError.message}` });
+            return json({ success: false, message: ingredientError.message });
         }
         console.log('Ingredients successfully inserted');
     }
+
+    // INSERT STEPS
+    if (steps.length > 0) {
+        const stepsInsertData = steps.map((step) => ({
+            recipe_id: recipeData.id,
+            index: step.index,
+            description: step.description,
+        }));
+
+        const { error: stepsError } = await supabase.from('ck_recipe_steps').insert(stepsInsertData);
+        if (stepsError) {
+            console.error(stepsError.message);
+            console.groupEnd();
+            return json({ success: false, message: stepsError.message });
+        }
+        console.log('Steps successfully inserted');
+    }
+
 
     console.log('Recipe created.');
     console.groupEnd();

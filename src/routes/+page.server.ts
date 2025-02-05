@@ -11,9 +11,7 @@ export const load: PageServerLoad = async (): Promise<any> => {
     if (recipeError) {
         console.error(recipeError.message);
         console.groupEnd();
-        return {
-            recipes: [],
-        };
+        return { recipes: [] };
     }
 
     console.log('Recipe data loaded.');
@@ -25,13 +23,38 @@ export const load: PageServerLoad = async (): Promise<any> => {
 
     console.log('Recipe images loaded.');
 
+    const { data: recipeCategories, error: recipeCategoryError } = await supabase
+        .from('ck_recipe_categories')
+        .select('recipe_id, category_id');
+    if (recipeCategoryError) {
+        console.error(recipeCategoryError.message);
+        console.groupEnd();
+        return { recipes: [] };
+    }
+
+    const { data: categoryData, error: categoryError } = await supabase
+        .from('ck_category')
+        .select('id, name');
+    if (categoryError) {
+        console.error(categoryError.message);
+        console.groupEnd();
+        return { recipes: [] };
+    }
+    const categoryMap = new Map(categoryData.map(cat => [cat.id, cat.name]));
+
+    console.log('Recipe categories loaded.');
+
     const recipes = recipeData.map((recipe) => {
-        const urlObj = urls.find((url) => url.id === recipe.id); // Match by ID
+        const urlObj = urls.find((url) => url.id === recipe.id);
+        const categories = recipeCategories
+            .filter((rc) => rc.recipe_id === recipe.id)
+            .map((rc) => categoryMap.get(rc.category_id) || 'Unknown');
         return {
             id: BigInt(recipe.id),
             name: recipe.name,
             image: urlObj?.image || '/images/default-image.jpg',
             difficulty: recipe.difficulty,
+            categories: categories,
         };
     });
 
