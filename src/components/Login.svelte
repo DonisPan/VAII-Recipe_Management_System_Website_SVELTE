@@ -72,6 +72,13 @@
 </div>
 
 <style>
+    .page-container {
+        margin: 0;
+        transform: translateX(-30px);
+        display: flex;
+        justify-items: center;
+    }
+
     .login_container {
         width: 400px;
         display: grid;

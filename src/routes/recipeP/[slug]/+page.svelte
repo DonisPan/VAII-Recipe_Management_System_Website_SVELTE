@@ -92,19 +92,21 @@
         {#if recipe}
             <!--HEADER-->
             <div class="recipe-header">
-                <h1>{recipe.name}</h1>
-                <!--SHOW FAVOURITE BUTTON ONLY IF USER IS LOGGED IN-->
-                {#if currentRole !== null}
-                <button class="favorite-btn"
-                        onclick={toggleFavorite}
-                        aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}>
-                    <svg class={isFavorite ? 'active' : ''}
-                         viewBox="0 0 24 24"
-                         xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                    </svg>
-                </button>
-                {/if}
+                <div class="recipe-title">
+                    <h1>{recipe.name}</h1>
+                    <!--SHOW FAVOURITE BUTTON ONLY IF USER IS LOGGED IN-->
+                    {#if currentRole !== null}
+                    <button class="favorite-btn"
+                            onclick={toggleFavorite}
+                            aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}>
+                        <svg class={isFavorite ? 'active' : ''}
+                             viewBox="0 0 24 24"
+                             xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                    </button>
+                    {/if}
+                </div>
                 <!--CATEGORIES-->
                 <h3 class="recipe-categories">
                     {#each recipe.categories as category}
@@ -258,6 +260,14 @@
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
     }
 
+    .recipe-title {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        gap: 10px;
+    }
+
     /* SECTION CONTAINERS */
     .recipe-description,
     .recipe-ingredients,
@@ -328,7 +338,8 @@
     }
 
     /* INGREDIENTS */
-    .ingredient-list {
+    .ingredient-list,
+    .steps-list {
         display: flex;
         flex-direction: column;
         gap: 6px;
@@ -366,18 +377,6 @@
         word-break: break-word;
         overflow-wrap: anywhere;
         line-height: 1.5;
-    }
-
-    /* STEPS */
-    .steps-list {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        padding: 12px;
-        border-radius: 12px;
-        background-color: white;
-        max-height: 300px;
-        overflow-y: auto;
     }
 
     .step-index {
@@ -445,9 +444,10 @@
 
     /* FAVOURITE BUTTON */
     .favorite-btn {
-        position: absolute;
-        right: 2rem;
-        top: 2rem;
+        all: unset;
+        margin-left: 1rem;
+        position: relative;
+        top: 1rem;
         background: none;
         border: none;
         cursor: pointer;
@@ -536,25 +536,43 @@
         height: 140px;
     }
 
-    /* RESPONSIVE */
     @media (max-width: 768px) {
         .recipe-page {
             padding: 1.5rem;
+        }
+
+        .recipe-header h1 {
+            font-size: 2.2rem;
         }
 
         .recipe-header img {
             max-height: 250px;
         }
 
-        .favorite-btn {
-            right: 1rem;
-            top: 1rem;
-        }
-
-        .favorite-btn svg {
-            width: 28px;
-            height: 28px;
+        .recipe-description,
+        .recipe-ingredients,
+        .recipe-steps {
+            padding: 1rem;
+            font-size: 0.9rem;
         }
     }
+
+    @media (max-width: 500px) {
+        .recipe-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .recipe-description,
+        .recipe-ingredients,
+        .recipe-steps {
+            padding: 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .recipe-header img {
+            max-height: 200px;
+        }
+    }
+
 
 </style>

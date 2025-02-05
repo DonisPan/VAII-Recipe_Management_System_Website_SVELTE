@@ -285,7 +285,7 @@
         margin-top: 1rem;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 860px) {
         .profile-page {
             padding: 1.5rem;
         }
@@ -295,7 +295,7 @@
         }
 
         .recipe-grid {
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            justify-items: center;
         }
 
         .requests-container {

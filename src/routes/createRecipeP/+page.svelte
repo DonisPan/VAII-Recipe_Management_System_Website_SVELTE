@@ -285,6 +285,10 @@
         transition: box-shadow 0.3s ease;
     }
 
+    .recipe-input-group input, textarea {
+        width: 97%;
+    }
+
     input:focus,
     textarea:focus,
     select:focus {

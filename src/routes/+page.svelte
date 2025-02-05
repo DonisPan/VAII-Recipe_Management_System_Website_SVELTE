@@ -103,6 +103,7 @@
 
     @media (max-width: 815px) {
         .page-content {
+            justify-items: center;
             grid-template-columns: repeat(2, 1fr);
         }
     }

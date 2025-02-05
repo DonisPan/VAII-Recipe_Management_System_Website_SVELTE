@@ -71,6 +71,8 @@
 <style>
     @import '/pallete.css';
 
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
     .container {
         overflow: hidden;
         width: 100%;
@@ -80,109 +82,150 @@
         justify-content: space-between;
         align-items: center;
         background-color: var(--ultra-violet);
-        padding: 0.5em;
-        margin: 0;
+        padding: 0.5em 1em;
         border-bottom: 3px solid var(--tekhelet);
         position: relative;
         z-index: 10;
-    }
-    .container li {
-        align-items: center;
-        padding: 0 1rem;
-        width: auto;
-        justify-content: center;
-    }
-    .container a {
-        text-align: center;
-        text-decoration: none;
-        font-size: 1.2rem;
-        color: #E7D8C5;
-        transition: color 0.3s ease;
-    }
-    .container a:hover {
-        font-size: 1.3rem;
-        text-shadow: var(--tekhelet) 4px 4px;
-    }
-    .container p {
-        text-decoration: none;
-        font-size: 1.5rem;
-        color: #E7D8C5;
-        margin-left: 1em;
-        padding: 0;
-        font-weight: bold;
+        transition: all 0.3s ease-in-out;
+
+        p {
+            text-decoration: none;
+            font-size: 1.5rem;
+            color: #E7D8C5;
+            font-weight: bold;
+            margin: 0;
+        }
     }
 
     .row {
-        display: inline-flex;
-        justify-content: space-between;
-        width: 100%;
-    }
-    .row ul {
-        list-style: none;
         display: flex;
-        justify-content: space-between;
+        align-items: center;
+        width: 100%;
         gap: 1rem;
     }
-    .row button, span {
-        all:unset;
-        text-align: center;
-        text-decoration: none;
-        font-size: 1.2rem;
-        color: #E7D8C5;
-        transition: color 0.3s ease;
-    }
-    .row span {
-        font-size: .9rem;
-    }
-    .row button:hover {
-        font-size: 1.3rem;
-        text-shadow: var(--tekhelet) 4px 4px;
-    }
-    .right {
-        justify-content: flex-end;
-    }
+
     .left {
+        display: flex;
         justify-content: flex-start;
+        flex-grow: 1;
     }
-    .center {
-        all:unset;
-        margin: 0;
+
+    .left ul {
+        list-style: none;
+        display: flex;
+        gap: 1rem;
+        margin-left: 1rem;
+        padding: 0;
         align-items: center;
     }
 
-    @media (max-width: 768px) {
+    .left a {
+        all: unset;
+        font-size: 1.2rem;
+        color: #E7D8C5;
+        text-decoration: none;
+        cursor: pointer;
+        transition: color 0.3s ease, font-size 0.3s ease;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .left a:hover {
+        font-size: 1.3rem;
+        text-shadow: var(--tekhelet) 2px 2px;
+    }
+
+
+    .right {
+        display: flex;
+        justify-content: flex-end;
+        flex-grow: 0;
+        margin-left: auto;
+    }
+
+    .right ul {
+        list-style: none;
+        display: flex;
+        gap: 1rem;
+        margin-right: 1rem;
+        padding: 0;
+        align-items: center;
+    }
+
+    .right a, .right button, .right span {
+        all: unset;
+        font-size: 1.2rem;
+        color: #E7D8C5;
+        text-decoration: none;
+        cursor: pointer;
+        transition: color 0.3s ease, font-size 0.3s ease;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .right a:hover, .right button:hover {
+        font-size: 1.3rem;
+        text-shadow: var(--tekhelet) 2px 2px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+        .container {
+            flex-direction: row;
+            height: auto;
+            padding: 1em;
+        }
+
+        .row {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 650px) {
         .container {
             flex-direction: column;
             height: auto;
             padding: 1em;
-            justify-content: flex-start;
+            align-items: center;
         }
-        .container p {
-            margin-bottom: 1rem;
-            font-size: 1.4rem;
-            text-align: center;
-        }
+
         .row {
-            display: block;
-            width: 100%;
-            text-align: center;
-        }
-        .row ul {
             flex-direction: column;
+            width: 100%;
+            align-items: center;
+        }
+
+        .left, .right {
             justify-content: center;
-            gap: 0.8rem;
-            margin-top: 10px;
+            width: 100%;
+        }
+
+        .left ul, .right ul {
+            flex-direction: column;
+            gap: 0.5rem;
+            text-align: center;
+            margin: 0;
+        }
+
+        .right {
+            margin-left: 0;
         }
     }
 
     @media (max-width: 400px) {
-        .container a {
-            font-size: 1rem;
-            padding: 0.6rem 0;
+        .container {
+            padding: 0.8em 0.5em;
         }
-        .container p {
+
+        p {
             font-size: 1.2rem;
-            margin-bottom: 0.8rem;
+        }
+
+        .right ul, .left ul {
+            gap: 0.4rem;
+        }
+
+        .right a, .right button, .right span, .left a {
+            font-size: 0.9rem;
         }
     }
+
 </style>
