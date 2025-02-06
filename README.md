@@ -9,8 +9,8 @@ Make sure you have **Node.js** (v16 or later) installed. If you don’t have it,
 
 ### 1️⃣ Clone the Repository
 ```sh
-git clone https://github.com/yourusername/cookerino.git
-cd cookerino
+git clone https://github.com/DonisPan/VAII-Recipe_Management_System_Website_SVELTE.git
+cd VAII-Recipe_Management_System_Website_SVELTE
 ```
 
 ### 2️⃣ Install Dependencies
