@@ -28,6 +28,9 @@ PUBLIC_SUPABASE_URL=your_supabase_project_url
 PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key # Keep this secret!
 ```
 
+Setup supabase like this and for testing you can disable RLS policies.
+![img.png](static/images/database_template.png)
+
 Make sure to replace the placeholders with actual values from your Supabase project.
 
 ## 📦 Installed Dependencies
