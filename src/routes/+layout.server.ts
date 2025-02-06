@@ -8,7 +8,7 @@ export const load: LayoutServerLoad = async ({ locals }): Promise<any> => {
 
     return {
         user: {
-            id: currentName ?? '',
+            id: currentName ?? '', // IF NULL OR UNDEFINED
             role: currentRole ?? '',
         }
     };

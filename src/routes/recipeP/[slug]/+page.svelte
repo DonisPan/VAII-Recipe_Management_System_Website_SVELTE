@@ -92,9 +92,7 @@
         const responseData = await response.json();
         if (responseData.success) {
             isEditing = false;
-            location.reload();
         }
-        alert(responseData.message);
     }
 
 </script>

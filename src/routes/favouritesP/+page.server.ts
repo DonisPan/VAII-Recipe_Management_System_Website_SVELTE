@@ -1,12 +1,11 @@
 import { supabase } from '$lib/supabase';
 import type {PageServerLoad} from "../../../.svelte-kit/types/src/routes/$types";
-import {goto} from "$app/navigation";
 
 export const load: PageServerLoad = async ({locals}): Promise<any> => {
     const currentUser = locals.currentUser;
 
     if (!currentUser) {
-        await goto('/');
+        return { recipes: [], currentUser };
     }
 
     console.group('Load Favourites Page');
@@ -19,7 +18,7 @@ export const load: PageServerLoad = async ({locals}): Promise<any> => {
     if (favouriteError) {
         console.error(favouriteError.message);
         console.groupEnd();
-        return { recipes: [] };
+        return { recipes: [], currentUser };
     }
 
     console.log('Load favourites data.');
@@ -39,7 +38,7 @@ export const load: PageServerLoad = async ({locals}): Promise<any> => {
     if (recipeError) {
         console.error(recipeError.message);
         console.groupEnd();
-        return { recipes: [] };
+        return { recipes: [], currentUser };
     }
 
     console.log('Load favourite recipes data.');
@@ -66,5 +65,5 @@ export const load: PageServerLoad = async ({locals}): Promise<any> => {
     console.log('Page loaded.');
     console.groupEnd();
 
-    return { recipes };
+    return { recipes, currentUser };
 };

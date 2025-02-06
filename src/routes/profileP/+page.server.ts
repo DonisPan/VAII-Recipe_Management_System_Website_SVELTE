@@ -1,14 +1,12 @@
 import type {PageServerLoad} from "../../../.svelte-kit/types/src/routes/$types";
 import {supabase} from "$lib/supabase";
-import {fail} from "@sveltejs/kit";
-import {goto} from "$app/navigation";
 
 export const load: PageServerLoad = async ({locals}): Promise<any> => {
     let currentUser = locals.currentUser;
     let currentRole = locals.currentRole;
 
     if (!currentUser) {
-        await goto('/');
+        return { profile: [], recipes: [], requests: [], currentUser };
     }
 
     console.group('Load Profile Page')
@@ -21,7 +19,7 @@ export const load: PageServerLoad = async ({locals}): Promise<any> => {
     if (recipeError) {
         console.error('Error fetching recipes:', recipeError.message);
         console.groupEnd();
-        return { recipes: [] };
+        return { profile: [], recipes: [], requests: [], currentUser };
     }
 
     console.log('Recipes Loaded.')
@@ -55,7 +53,7 @@ export const load: PageServerLoad = async ({locals}): Promise<any> => {
     if (currentUserError) {
         console.error(currentUserError.message);
         console.groupEnd();
-        return fail(400, { error: currentUserError.message });
+        return { profile: [], recipes: [], requests: [], currentUser };
     }
 
     console.log('User Data Loaded.');
@@ -80,6 +78,7 @@ export const load: PageServerLoad = async ({locals}): Promise<any> => {
     if (userDataError) {
         console.error('Error fetching user data:', userDataError.message);
         console.groupEnd();
+        return { profile: [], recipes: [], requests: [], currentUser };
     }
 
     console.log('Requests Loaded.');
@@ -87,5 +86,5 @@ export const load: PageServerLoad = async ({locals}): Promise<any> => {
     console.log('Page Loaded');
     console.groupEnd();
 
-    return { profile, recipes, requests };
+    return { profile, recipes, requests, currentUser };
 }

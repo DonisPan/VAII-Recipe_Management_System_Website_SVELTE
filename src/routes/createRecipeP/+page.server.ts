@@ -1,12 +1,11 @@
 import { supabase } from '$lib/supabase';
 import type {PageServerLoad} from './$types';
-import {goto} from "$app/navigation";
 
 export const load: PageServerLoad = async ({locals}): Promise<any> => {
-    let currentUser = locals.currentUser;
+    let currentRole = locals.currentRole;
 
-    if (!currentUser) {
-        await goto('/');
+    if (!currentRole) {
+        return { categories: [], ingredients: [], currentRole: currentRole };
     }
 
     console.group('Load Create Recipe Page Data');
@@ -17,7 +16,7 @@ export const load: PageServerLoad = async ({locals}): Promise<any> => {
     if (categoriesError) {
         console.error(categoriesError.message);
         console.groupEnd();
-        return { categories: [] };
+        return { categories: [], ingredients: [], currentRole: currentRole };
     }
 
     const { data: ingredients, error: ingredientsError } = await supabase
@@ -26,10 +25,10 @@ export const load: PageServerLoad = async ({locals}): Promise<any> => {
     if (ingredientsError) {
         console.error(ingredientsError.message);
         console.groupEnd();
-        return { categories, ingredients: [] };
+        return { categories, ingredients: [], currentRole: currentRole };
     }
 
     console.log('Data loaded.');
     console.groupEnd();
-    return { categories, ingredients };
+    return { categories, ingredients, currentRole: currentRole };
 };

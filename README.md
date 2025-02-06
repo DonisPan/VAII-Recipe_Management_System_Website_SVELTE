@@ -1,38 +1,65 @@
-# sv
+# 🥘 Cookerino
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A web application for managing and sharing recipes built with **SvelteKit**, **Supabase**, and **Zod**.
 
-## Creating a project
+## 🚀 Installation Guide
 
-If you're seeing this, you've probably already done this step. Congrats!
+### Prerequisites
+Make sure you have **Node.js** (v16 or later) installed. If you don’t have it, download it from [nodejs.org](https://nodejs.org/).
 
-```bash
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
+### 1️⃣ Clone the Repository
+```sh
+git clone https://github.com/yourusername/cookerino.git
+cd cookerino
 ```
 
-## Developing
+### 2️⃣ Install Dependencies
+Run the following command to install all required dependencies:
+```sh
+npm install
+```
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+### 3️⃣ Set Up Environment Variables
 
-```bash
+Create a .env.local file in the root directory and configure it as follows:
+Run the following command to install all required dependencies:
+```sh
+PUBLIC_SUPABASE_URL=your_supabase_project_url
+PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key # Keep this secret!
+```
+
+Make sure to replace the placeholders with actual values from your Supabase project.
+
+## 📦 Installed Dependencies
+
+### Dev Dependencies
+These are required for development:
+```sh
+npm install -D @sveltejs/adapter-auto @sveltejs/kit @sveltejs/vite-plugin-svelte @tsconfig/svelte svelte svelte-check sveltekit-superforms typescript vite zod
+```
+
+### Runtime Dependencies
+These are needed for the application to function:
+```sh
+npm install @supabase/auth-helpers-sveltekit @supabase/auth-ui-shared @supabase/auth-ui-svelte @supabase/ssr @supabase/supabase-js bootstrap superforms
+```
+
+## 🛠 Usage
+
+### Development Server
+Run the development server with hot-reloading:
+```sh
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+## 🌟 Features
+- **User Authentication** with Supabase
+- **Recipe Management** (Create, Edit, Delete)
+- **Favorite Recipes**
+- **Categories & Filters**
+- **Form Validation** using Zod
+- **Responsive UI** 
 
-To create a production version of your app:
 
-```bash
-npm run build
-```
+Happy Cooking! 🍲🔥
 
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.

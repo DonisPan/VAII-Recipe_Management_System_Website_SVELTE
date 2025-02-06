@@ -1,20 +1,24 @@
 <script lang="ts">
     import RecipeCard from "../../components/RecipeCard.svelte";
     import {writable} from "svelte/store";
+    import {formatDate} from "$lib/functions";
+    import {goto} from "$app/navigation";
+    import {onMount} from "svelte";
 
     export let data: {
         profile: { name: string; surname: string; role: string };
         recipes: { id: bigint; name: string; image: string; difficulty: string }[];
         requests: { id: string, name: string; surname: string, registered_at: string }[];
+        currentUser: any | null ;
     };
 
-    let requests = writable(data.requests);
+    onMount(() => {
+        if (!data.currentUser) {
+            goto('/');
+        }
+    })
 
-    // PARSER FOR TIME
-    function formatDate(dateString: string) {
-        const date = new Date(dateString);
-        return date.toLocaleString();
-    }
+    let requests = writable(data.requests);
 
     // MAKE COOK REQUEST
     async function makeCookRequest(): Promise<void> {
@@ -34,10 +38,11 @@
         });
 
         const responseData = await response.json();
-        if (responseData.success) {
-            requests.update((r) => r.filter((req) => req.id !== userId));
+        if (!responseData.success) {
+            alert(responseData.message);
+            return;
         }
-        alert(responseData.message);
+        requests.update((r) => r.filter((req) => req.id !== userId));
     }
 
     async function declineRequest(userId: string): Promise<any> {
@@ -47,10 +52,10 @@
         });
 
         const responseData = await response.json();
-        if (responseData.success) {
-            requests.update((r) => r.filter((req) => req.id !== userId));
+        if (!responseData.success) {
+            alert(responseData.message);
         }
-        alert(responseData.message);
+        requests.update((r) => r.filter((req) => req.id !== userId));
     }
 </script>
 

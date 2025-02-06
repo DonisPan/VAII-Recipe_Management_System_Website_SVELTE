@@ -2,11 +2,19 @@
     import { goto } from '$app/navigation';
     import { writable } from 'svelte/store';
     import {recipeSchema} from "$lib/zodSchemas";
+    import {onMount} from "svelte";
 
     export let data: {
         categories: { id: number; name: string }[];
         ingredients: { id: number; name: string; units: string }[];
+        currentRole: any;
     };
+
+    onMount(() => {
+        if (data.currentRole === 'regular' || !data.currentRole) {
+            goto('/');
+        }
+    })
 
     let name = '';
     let description = '';

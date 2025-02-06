@@ -8,6 +8,7 @@ export async function POST({ request, locals }) {
 
     if (!currentUser) {
         await goto('/');
+        return json({ success: false, message: 'You do not have permissions for this action.' });
     }
 
     const formData = await request.formData();
@@ -54,13 +55,16 @@ export async function POST({ request, locals }) {
     }
 
     // INSERT RECIPE
-    const { data: recipeData, error: recipeError } = await supabase.from('ck_recipe').insert({
-        name,
-        user_id: currentUser,
-        description,
-        difficulty,
-        image: imagePath,
-    }).select('id').single();
+    const { data: recipeData, error: recipeError } = await supabase
+        .from('ck_recipe')
+        .insert({
+            name,
+            user_id: currentUser,
+            description,
+            difficulty,
+            image: imagePath,})
+        .select('id')
+        .single();
     if (recipeError) {
         console.error(recipeError.message);
         console.groupEnd();
@@ -75,7 +79,9 @@ export async function POST({ request, locals }) {
             category_id: categoryId
         }));
 
-        const { error: categoryError } = await supabase.from('ck_recipe_categories').insert(categoryInsertData);
+        const { error: categoryError } = await supabase
+            .from('ck_recipe_categories')
+            .insert(categoryInsertData);
         if (categoryError) {
             console.error(categoryError.message);
             console.groupEnd();
@@ -93,7 +99,9 @@ export async function POST({ request, locals }) {
             amount: ingredient.amount,
         }));
 
-        const { error: ingredientError } = await supabase.from('ck_recipe_ingredients').insert(ingredientInsertData);
+        const { error: ingredientError } = await supabase
+            .from('ck_recipe_ingredients')
+            .insert(ingredientInsertData);
         if (ingredientError) {
             console.error(ingredientError.message);
             console.groupEnd();
@@ -110,7 +118,9 @@ export async function POST({ request, locals }) {
             description: step.description,
         }));
 
-        const { error: stepsError } = await supabase.from('ck_recipe_steps').insert(stepsInsertData);
+        const { error: stepsError } = await supabase
+            .from('ck_recipe_steps')
+            .insert(stepsInsertData);
         if (stepsError) {
             console.error(stepsError.message);
             console.groupEnd();
@@ -118,7 +128,6 @@ export async function POST({ request, locals }) {
         }
         console.log('Steps successfully inserted');
     }
-
 
     console.log('Recipe created.');
     console.groupEnd();

@@ -29,10 +29,12 @@
 
         const responseData = await response.json();
         if (!responseData.success) {
-            clientError.set(responseData.message);
             return;
         }
 
+        clientError.set(responseData.message);
+
+        await new Promise(resolve => setTimeout(resolve, 1000)); // SLEEP FOR 1 SECOND
         await goto('/');
         location.reload();
     }

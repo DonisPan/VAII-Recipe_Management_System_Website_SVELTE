@@ -45,10 +45,10 @@ export const load: PageServerLoad = async (): Promise<any> => {
     console.log('Recipe categories loaded.');
 
     const recipes = recipeData.map((recipe) => {
-        const urlObj = urls.find((url) => url.id === recipe.id);
+        const urlObj = urls.find((url) => url.id === recipe.id); // FIND RECIPE IMAGE
         const categories = recipeCategories
             .filter((rc) => rc.recipe_id === recipe.id)
-            .map((rc) => categoryMap.get(rc.category_id) || 'Unknown');
+            .map((rc) => categoryMap.get(rc.category_id) || 'Unknown'); // FIND RECIPE CATEGORIES
         return {
             id: BigInt(recipe.id),
             name: recipe.name,

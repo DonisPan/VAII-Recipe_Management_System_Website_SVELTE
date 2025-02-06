@@ -1,9 +1,10 @@
 <script lang="ts">
     import type { LayoutData } from './$types';
     import {goto} from "$app/navigation";
+    import {writable} from "svelte/store";
 
     export let data: LayoutData;
-    let { user } = data;
+    let user = writable(data.user);
 
     async function logout(): Promise<void> {
         const response = await fetch('/api/loginP/logout', {
@@ -30,11 +31,11 @@
             <ul>
                 <li> <a href="/">Home</a> </li>
 
-                {#if user.role && user.role !== 'regular'}
+                {#if $user.role && $user.role !== 'regular'}
                     <li> <a href="/createRecipeP">Create Recipe</a> </li>
                 {/if}
 
-                {#if user.id}
+                {#if $user.id}
                     <li> <a href="/profileP">Profile</a> </li>
                     <li> <a href="/favouritesP">Favourites</a> </li>
                 {/if}
@@ -45,7 +46,7 @@
         <div class="row right">
             <ul>
 
-                {#if !user.id}
+                {#if !$user.id}
                     <li> <a href="/loginP">Sign in</a> </li>
                     <li> <a href="/registerP" >Sign up</a> </li>
                 {:else}
@@ -53,8 +54,8 @@
 
                     <li>
                         <div class="center">
-                            <span>{user.id}<br></span>
-                            <span>{user.role}</span>
+                            <span>{$user.id}<br></span>
+                            <span>{$user.role}</span>
                         </div>
                     </li>
 
